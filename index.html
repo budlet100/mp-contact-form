@@ -101,6 +101,27 @@
         const postcodeRegex = /^[A-Z]{1,2}\d[A-Z\d]? ?\d[A-Z]{2}$/i;
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+        let mpData = [];
+
+        // Load MP data from CSV file
+        async function loadMPData() {
+            const response = await fetch('15.10.24.csv');
+            const csvData = await response.text();
+            const lines = csvData.split('\n');
+            const headers = lines[0].split(',');
+
+            for (let i = 1; i < lines.length; i++) {
+                const values = lines[i].split(',');
+                if (values.length === headers.length) {
+                    const mp = {};
+                    for (let j = 0; j < headers.length; j++) {
+                        mp[headers[j]] = values[j];
+                    }
+                    mpData.push(mp);
+                }
+            }
+        }
+
         // Form validation
         async function validateInput() {
             let isValid = true;
@@ -162,49 +183,9 @@
             };
         }
 
-        async function searchMPContactPage(name) {
-            const query = `${encodeURIComponent(name)} contact`;
-            const url = `https://www.google.com/search?q=${query}`;
-
-            try {
-                const response = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(url)}`);
-                const data = await response.json();
-                const html = data.contents;
-
-                const parser = new DOMParser();
-                const doc = parser.parseFromString(html, 'text/html');
-
-                const linkElement = doc.querySelector('a');
-                if (linkElement) {
-                    return linkElement.href;
-                } else {
-                    throw new Error('Contact page URL not found');
-                }
-            } catch (error) {
-                console.error('Error searching MP contact page:', error);
-                return null;
-            }
-        }
-
-        async function getEmailFromContactPage(url) {
-            try {
-                const response = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(url)}`);
-                const data = await response.json();
-                const html = data.contents;
-
-                const parser = new DOMParser();
-                const doc = parser.parseFromString(html, 'text/html');
-
-                const emailElement = doc.querySelector('a[href^="mailto:"]');
-                if (emailElement) {
-                    return emailElement.href.replace('mailto:', '');
-                } else {
-                    throw new Error('Email address not found on the contact page');
-                }
-            } catch (error) {
-                console.error('Error retrieving email from contact page:', error);
-                return null;
-            }
+        function findMPEmail(name) {
+            const mp = mpData.find(mp => mp.Forename.toLowerCase() + ' ' + mp.Surname.toLowerCase() === name.toLowerCase());
+            return mp ? mp.Email : null;
         }
 
         // Form submission handler
@@ -226,23 +207,16 @@
 
             mpDetails.textContent = `${mp.name} (${mp.constituency})`;
             
-            // Search for the MP's contact page
-            const contactPageUrl = await searchMPContactPage(mp.name);
-            if (contactPageUrl) {
-                // Extract the email address from the contact page
-                const emailAddress = await getEmailFromContactPage(contactPageUrl);
-                if (emailAddress) {
-                    const subject = encodeURIComponent('Constituent Inquiry');
-                    const body = encodeURIComponent(`Dear ${mp.name},\n\nI am writing to you as a concerned constituent regarding...\n\nSincerely,\n${name}`);
-                    emailLink.href = `mailto:${emailAddress}?subject=${subject}&body=${body}`;
-                    emailLink.textContent = 'Email your MP';
-                } else {
-                    emailLink.href = contactPageUrl;
-                    emailLink.textContent = 'Visit MP\'s contact page';
-                }
+            // Find the email address from the MP data
+            const emailAddress = findMPEmail(mp.name);
+            if (emailAddress) {
+                const subject = encodeURIComponent('Constituent Inquiry');
+                const body = encodeURIComponent(`Dear ${mp.name},\n\nI am writing to you as a concerned constituent regarding...\n\nSincerely,\n${name}`);
+                emailLink.href = `mailto:${emailAddress}?subject=${subject}&body=${body}`;
+                emailLink.textContent = 'Email your MP';
             } else {
                 emailLink.href = '#';
-                emailLink.textContent = 'Contact page not found';
+                emailLink.textContent = 'Email address not found';
             }
 
             // Generate message preview
@@ -289,6 +263,9 @@
         gdprConsentInput.addEventListener('change', async () => {
             await validateInput();
         });
+
+        // Load MP data on page load
+        loadMPData();
     </script>
 </body>
 </html>
