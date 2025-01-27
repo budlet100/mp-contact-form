@@ -76,200 +76,68 @@
             <!-- Submit Button -->
             <button type="submit" id="submitButton"
                 class="w-full bg-orange-600 text-white py-3 px-4 rounded-md hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 transition-colors disabled:bg-gray-400">
-                Contact My MP
+                Find My MP
             </button>
         </form>
-
-        <!-- Loading Overlay -->
-        <div id="loadingOverlay" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div class="bg-white p-6 rounded-lg shadow-xl">
-                <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600 mx-auto"></div>
-                <p class="mt-4 text-gray-700">Looking up your MP...</p>
-            </div>
-        </div>
     </div>
 
     <script>
         const form = document.getElementById('mpContactForm');
-        const loadingOverlay = document.getElementById('loadingOverlay');
-        const submitButton = document.getElementById('submitButton');
         const mpInfo = document.getElementById('mpInfo');
         const mpDetails = document.getElementById('mpDetails');
         const emailLink = document.getElementById('emailLink');
         const messagePreview = document.getElementById('messagePreview');
         const previewText = document.getElementById('previewText');
-        const postcodeRegex = /^[A-Z]{1,2}\d[A-Z\d]? ?\d[A-Z]{2}$/i;
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        const submitButton = document.getElementById('submitButton');
 
-        let mpData = [];
-
-        // Load MP data from CSV file
-        async function loadMPData() {
-            const response = await fetch('15.10.24.csv');
-            const csvData = await response.text();
-            const lines = csvData.split('\n');
-            const headers = lines[0].split(',');
-
-            for (let i = 1; i < lines.length; i++) {
-                const values = lines[i].split(',');
-                if (values.length === headers.length) {
-                    const mp = {};
-                    for (let j = 0; j < headers.length; j++) {
-                        mp[headers[j]] = values[j];
-                    }
-                    mpData.push(mp);
-                }
-            }
-        }
-
-        // Form validation
-        async function validateInput() {
-            let isValid = true;
-
-            // Name validation
-            const name = document.getElementById('name').value.trim();
-            if (name === '') {
-                document.getElementById('nameError').classList.remove('hidden');
-                isValid = false;
-            } else {
-                document.getElementById('nameError').classList.add('hidden');
-            }
-
-            // Email validation
-            const email = document.getElementById('email').value.trim();
-            if (!emailRegex.test(email)) {
-                document.getElementById('emailError').classList.remove('hidden');
-                isValid = false;
-            } else {
-                document.getElementById('emailError').classList.add('hidden');
-            }
-
-            // Postcode validation
-            const postcode = document.getElementById('postcode').value.trim();
-            if (!postcodeRegex.test(postcode)) {
-                document.getElementById('postcodeError').classList.remove('hidden');
-                isValid = false;
-            } else {
-                document.getElementById('postcodeError').classList.add('hidden');
-            }
-
-            // GDPR consent validation
-            const gdprConsent = document.getElementById('gdprConsent').checked;
-            if (!gdprConsent) {
-                document.getElementById('gdprError').classList.remove('hidden');
-                isValid = false;
-            } else {
-                document.getElementById('gdprError').classList.add('hidden');
-            }
-
-            return isValid;
-        }
-
-        async function lookupMP(postcode) {
-            const apiKey = 'FncmgQEVdkSUE32UAMFKFsca';
-            const url = `https://www.theyworkforyou.com/api/getMP?postcode=${encodeURIComponent(postcode)}&key=${apiKey}&output=js`;
-            
-            console.log('Fetching MP data for postcode:', postcode); // Debug log
-            const response = await fetch(url);
-            console.log('API Response:', response); // Debug log
-            
-            const data = await response.json();
-            console.log('Parsed data:', data); // Debug log
-
-            return {
-                name: data.full_name,
-                constituency: data.constituency,
-                personId: data.person_id
-            };
-        }
-
-        function findMPEmail(name) {
-            const mp = mpData.find(mp => `${mp.Forename} ${mp.Surname}`.toLowerCase() === name.toLowerCase());
-            return mp ? mp.Email : null;function findMPEmail(name) {
-    const [forename, surname] = name.split(' ');
-    const mp = mpData.find(mp => mp.Forename.toLowerCase() === forename.toLowerCase() && mp.Surname.toLowerCase() === surname.toLowerCase());
-    return mp ? mp.Email : null;
-
-        }
-
-        // Form submission handler
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
-            
-            if (!await validateInput()) {
-                return;
+
+            const postcode = document.getElementById('postcode').value;
+            const apiKey = 'FncmgQEVdkSUE32UAMFKFsca';
+            const apiUrl = `https://www.theyworkforyou.com/api/getMP?postcode=${postcode}&key=${apiKey}`;
+
+            try {
+                const response = await fetch(apiUrl);
+                const data = await response.json();
+                const mpName = data.full_name;
+
+                const mpData = await getMpData(mpName);
+                if (mpData) {
+                    mpDetails.textContent = `${mpData.name} (${mpData.party}) - ${mpData.constituency}`;
+                    emailLink.href = `mailto:${mpData.email}?subject=Your%20subject%20here&body=Your%20message%20here`;
+                    mpInfo.classList.remove('hidden');
+                    messagePreview.classList.remove('hidden');
+                    previewText.textContent = 'Your message preview goes here';
+                } else {
+                    mpDetails.textContent = 'MP not found in the CSV data';
+                    mpInfo.classList.remove('hidden');
+                }
+            } catch (error) {
+                console.error('Error fetching MP data:', error);
+                mpDetails.textContent = 'Error fetching MP data. Please try again.';
+                mpInfo.classList.remove('hidden');
             }
-
-            const postcode = document.getElementById('postcode').value.trim();
-            const name = document.getElementById('name').value.trim();
-            const email = document.getElementById('email').value.trim();
-
-            loadingOverlay.classList.remove('hidden');
-            submitButton.disabled = true;
-
-            const mp = await lookupMP(postcode);
-
-            mpDetails.textContent = `${mp.name} (${mp.constituency})`;
-            
-            // Find the email address from the MP data
-            const emailAddress = findMPEmail(mp.name);
-            if (emailAddress) {
-                const subject = encodeURIComponent('Constituent Inquiry');
-                const body = encodeURIComponent(`Dear ${mp.name},\n\nI am writing to you as a concerned constituent regarding...\n\nSincerely,\n${name}`);
-                emailLink.href = `mailto:${emailAddress}?subject=${subject}&body=${body}`;
-                emailLink.textContent = 'Email your MP';
-            } else {
-                emailLink.href = '#';
-                emailLink.textContent = 'Email address not found';
-            }
-
-            // Generate message preview
-            previewText.textContent = `Dear ${mp.name},\n\nI am writing to you as a concerned constituent regarding...\n\nSincerely,\n${name}`;
-            messagePreview.classList.remove('hidden');
-
-            mpInfo.classList.remove('hidden');
-
-            loadingOverlay.classList.add('hidden');
-            submitButton.disabled = false;
         });
 
-        // Debounced form validation
-        function debounce(func, wait) {
-            let timeout;
-            return function executedFunction(...args) {
-                const later = () => {
-                    clearTimeout(timeout);
-                    func(...args);
-                };
-                clearTimeout(timeout);
-                timeout = setTimeout(later, wait);
-            };
+        async function getMpData(mpName) {
+            const response = await fetch('15.10.24.csv');
+            const csvData = await response.text();
+            const rows = csvData.split('\n').slice(1);
+
+            for (const row of rows) {
+                const [forename, surname, displayName, listName, party, constituency, address1, address2, postcode, email] = row.split(',');
+                if (`${forename} ${surname}` === mpName) {
+                    return {
+                        name: displayName,
+                        party,
+                        constituency,
+                        email
+                    };
+                }
+            }
+            return null;
         }
-
-        // Real-time form validation
-        const nameInput = document.getElementById('name');
-        const emailInput = document.getElementById('email');
-        const postcodeInput = document.getElementById('postcode');
-        const gdprConsentInput = document.getElementById('gdprConsent');
-
-        nameInput.addEventListener('input', debounce(async () => {
-            await validateInput();
-        }, 500));
-
-        emailInput.addEventListener('input', debounce(async () => {
-            await validateInput();
-        }, 500));
-
-        postcodeInput.addEventListener('input', debounce(async () => {
-            await validateInput();
-        }, 500));
-
-        gdprConsentInput.addEventListener('change', async () => {
-            await validateInput();
-        });
-
-        // Load MP data on page load
-        loadMPData();
     </script>
 </body>
 </html>
