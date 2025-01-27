@@ -163,33 +163,39 @@ ${name}`;
             document.getElementById('messagePreview').classList.remove('hidden');
         }
 
-        async function lookupMP(postcode) {
-            const apiKey = 'FncmgQEVdkSUE32UAMFKFsca';
-            const url = `https://www.theyworkforyou.com/api/getMPs?postcode=${encodeURIComponent(postcode)}&key=${apiKey}&output=js`;
-            
-            try {
-                const response = await fetch(url);
-                const data = await response.json();
-
-                if (data.error) {
-                    throw new Error(data.error);
-                }
-
-                if (!data || !Array.isArray(data) || data.length === 0) {
-                    throw new Error('No MP found for this postcode');
-                }
-
-                return {
-                    name: data[0].name,
-                    email: data[0].email || data[0].office_email,
-                    constituency: data[0].constituency
-                };
-
-            } catch (error) {
-                console.error('Error during MP lookup:', error);
-                throw new Error(error.message || 'Unable to find MP information. Please check your postcode.');
-            }
+async function lookupMP(postcode) {
+    const apiKey = 'FncmgQEVdkSUE32UAMFKFsca';
+    // Modified API endpoint format
+    const url = `https://www.theyworkforyou.com/api/getMP?postcode=${encodeURIComponent(postcode)}&key=${apiKey}&output=json`;
+    
+    try {
+        console.log('Fetching MP data for postcode:', postcode); // Debug log
+        const response = await fetch(url);
+        console.log('API Response:', response); // Debug log
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
         }
+        
+        const data = await response.json();
+        console.log('Parsed data:', data); // Debug log
+
+        if (data.error) {
+            throw new Error(data.error);
+        }
+
+        // Modified to handle the correct response format
+        return {
+            name: data.full_name || data.name,
+            email: data.email || data.office_email,
+            constituency: data.constituency
+        };
+
+    } catch (error) {
+        console.error('Error during MP lookup:', error);
+        throw new Error(error.message || 'Unable to find MP information. Please check your postcode.');
+    }
+}
 
         // Form submission handler
         form.addEventListener('submit', async (e) => {
