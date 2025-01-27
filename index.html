@@ -1,144 +1,82 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
-  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-  <meta http-equiv="Content-Style-Type" content="text/css">
-  <title></title>
-  <meta name="Generator" content="Cocoa HTML Writer">
-  <meta name="CocoaVersion" content="2575.3">
-  <style type="text/css">
-    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica}
-    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica; min-height: 14.0px}
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MP Contact Form</title>
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-<p class="p1">&lt;!DOCTYPE html&gt;</p>
-<p class="p1">&lt;html lang="en"&gt;</p>
-<p class="p1">&lt;!-- Previous head and body structure remains the same until the script section --&gt;</p>
-<p class="p2"><br></p>
-<p class="p1">&lt;script&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>// Modified lookupMP function with your API key and better error handling</p>
-<p class="p1"><span class="Apple-converted-space">    </span>async function lookupMP(postcode) {</p>
-<p class="p1"><span class="Apple-converted-space">        </span>const apiKey = 'FncmgQEVdkSUE32UAMFKFsca';</p>
-<p class="p1"><span class="Apple-converted-space">        </span>// Using the correct API endpoint format</p>
-<p class="p1"><span class="Apple-converted-space">        </span>const url = `https://www.theyworkforyou.com/api/getMPs?postcode=${encodeURIComponent(postcode)}&amp;key=${apiKey}&amp;output=js`;</p>
-<p class="p2"><span class="Apple-converted-space">        </span></p>
-<p class="p1"><span class="Apple-converted-space">        </span>try {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const response = await fetch(url);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const data = await response.json();</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">            </span>// TheyWorkForYou specific error handling</p>
-<p class="p1"><span class="Apple-converted-space">            </span>if (data.error) {</p>
-<p class="p1"><span class="Apple-converted-space">                </span>throw new Error(data.error);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">            </span>// Check if we got any MPs back</p>
-<p class="p1"><span class="Apple-converted-space">            </span>if (!data || !Array.isArray(data) || data.length === 0) {</p>
-<p class="p1"><span class="Apple-converted-space">                </span>throw new Error('No MP found for this postcode');</p>
-<p class="p1"><span class="Apple-converted-space">            </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">            </span>// Return the current MP (first in the array)</p>
-<p class="p1"><span class="Apple-converted-space">            </span>return {</p>
-<p class="p1"><span class="Apple-converted-space">                </span>name: data[0].name,</p>
-<p class="p1"><span class="Apple-converted-space">                </span>email: data[0].email || data[0].office_email, // Fallback to office email if available</p>
-<p class="p1"><span class="Apple-converted-space">                </span>constituency: data[0].constituency</p>
-<p class="p1"><span class="Apple-converted-space">            </span>};</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>} catch (error) {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>console.error('Error during MP lookup:', error);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>throw new Error(error.message || 'Unable to find MP information. Please check your postcode.');</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p1"><span class="Apple-converted-space">    </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">    </span>// Add rate limiting to prevent API abuse</p>
-<p class="p1"><span class="Apple-converted-space">    </span>function debounce(func, wait) {</p>
-<p class="p1"><span class="Apple-converted-space">        </span>let timeout;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>return function executedFunction(...args) {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const later = () =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">                </span>clearTimeout(timeout);</p>
-<p class="p1"><span class="Apple-converted-space">                </span>func(...args);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>};</p>
-<p class="p1"><span class="Apple-converted-space">            </span>clearTimeout(timeout);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>timeout = setTimeout(later, wait);</p>
-<p class="p1"><span class="Apple-converted-space">        </span>};</p>
-<p class="p1"><span class="Apple-converted-space">    </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">    </span>// Modify form submission handler with better error handling</p>
-<p class="p1"><span class="Apple-converted-space">    </span>form.addEventListener('submit', async (e) =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">        </span>e.preventDefault();</p>
-<p class="p2"><span class="Apple-converted-space">        </span></p>
-<p class="p1"><span class="Apple-converted-space">        </span>if (!await validateInput()) {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>return;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>const name = document.getElementById('name').value.trim();</p>
-<p class="p1"><span class="Apple-converted-space">        </span>const email = document.getElementById('email').value.trim();</p>
-<p class="p1"><span class="Apple-converted-space">        </span>const postcode = document.getElementById('postcode').value.trim();</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>// Show loading overlay</p>
-<p class="p1"><span class="Apple-converted-space">        </span>loadingOverlay.classList.remove('hidden');</p>
-<p class="p1"><span class="Apple-converted-space">        </span>submitButton.disabled = true;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>try {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const mp = await lookupMP(postcode);</p>
-<p class="p2"><span class="Apple-converted-space">            </span></p>
-<p class="p1"><span class="Apple-converted-space">            </span>if (!mp.email) {</p>
-<p class="p1"><span class="Apple-converted-space">                </span>throw new Error("MP's email address is not available. Please contact your MP through their website.");</p>
-<p class="p1"><span class="Apple-converted-space">            </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">            </span>// Update MP info</p>
-<p class="p1"><span class="Apple-converted-space">            </span>mpDetails.textContent = `${mp.name} (${mp.constituency})`;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>mpInfo.classList.remove('hidden');</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">            </span>// Update message preview</p>
-<p class="p1"><span class="Apple-converted-space">            </span>updateMessagePreview(name, mp.name);</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">            </span>// Create mailto link with error handling</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const subject = 'Constituent Contact Regarding Climate Action';</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const mailtoLink = `mailto:${mp.email}?subject=${encodeURIComponent(subject)}&amp;body=${encodeURIComponent(messagePreview.textContent)}`;</p>
-<p class="p2"><span class="Apple-converted-space">            </span></p>
-<p class="p1"><span class="Apple-converted-space">            </span>// Small delay to ensure user sees the MP information</p>
-<p class="p1"><span class="Apple-converted-space">            </span>setTimeout(() =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">                </span>window.location.href = mailtoLink;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>}, 500);</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>} catch (error) {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>// Create a more user-friendly error message display</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const errorDiv = document.createElement('div');</p>
-<p class="p1"><span class="Apple-converted-space">            </span>errorDiv.className = 'bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mt-4';</p>
-<p class="p1"><span class="Apple-converted-space">            </span>errorDiv.role = 'alert';</p>
-<p class="p1"><span class="Apple-converted-space">            </span>errorDiv.innerHTML = `</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;strong class="font-bold"&gt;Error: &lt;/strong&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;span class="block sm:inline"&gt;${error.message}&lt;/span&gt;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>`;</p>
-<p class="p2"><span class="Apple-converted-space">            </span></p>
-<p class="p1"><span class="Apple-converted-space">            </span>// Insert error message before the form</p>
-<p class="p1"><span class="Apple-converted-space">            </span>form.insertAdjacentElement('beforebegin', errorDiv);</p>
-<p class="p2"><span class="Apple-converted-space">            </span></p>
-<p class="p1"><span class="Apple-converted-space">            </span>// Remove error message after 5 seconds</p>
-<p class="p1"><span class="Apple-converted-space">            </span>setTimeout(() =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">                </span>errorDiv.remove();</p>
-<p class="p1"><span class="Apple-converted-space">            </span>}, 5000);</p>
-<p class="p1"><span class="Apple-converted-space">        </span>} finally {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>loadingOverlay.classList.add('hidden');</p>
-<p class="p1"><span class="Apple-converted-space">            </span>submitButton.disabled = false;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p1"><span class="Apple-converted-space">    </span>});</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">    </span>// Add postcode validation on input</p>
-<p class="p1"><span class="Apple-converted-space">    </span>const postcodeInput = document.getElementById('postcode');</p>
-<p class="p1"><span class="Apple-converted-space">    </span>postcodeInput.addEventListener('input', debounce((e) =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">        </span>const postcode = e.target.value.trim();</p>
-<p class="p1"><span class="Apple-converted-space">        </span>const postcodeError = document.getElementById('postcodeError');</p>
-<p class="p2"><span class="Apple-converted-space">        </span></p>
-<p class="p1"><span class="Apple-converted-space">        </span>if (postcode &amp;&amp; !postcodeRegex.test(postcode)) {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>postcodeError.classList.remove('hidden');</p>
-<p class="p1"><span class="Apple-converted-space">        </span>} else {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>postcodeError.classList.add('hidden');</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p1"><span class="Apple-converted-space">    </span>}, 500));</p>
-<p class="p1">&lt;/script&gt;</p>
-<p class="p1">&lt;/body&gt;</p>
-<p class="p1">&lt;/html&gt;</p>
+<body class="bg-gray-100 min-h-screen p-4">
+    <div class="max-w-lg mx-auto bg-white p-6 rounded-lg shadow-md">
+        <h1 class="text-2xl font-bold mb-6">Contact Your MP</h1>
+        
+        <form id="form" class="space-y-4">
+            <div>
+                <label for="name" class="block text-sm font-medium text-gray-700">Your Name</label>
+                <input type="text" id="name" required
+                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+            </div>
+
+            <div>
+                <label for="email" class="block text-sm font-medium text-gray-700">Your Email</label>
+                <input type="email" id="email" required
+                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+            </div>
+
+            <div>
+                <label for="postcode" class="block text-sm font-medium text-gray-700">Your Postcode</label>
+                <input type="text" id="postcode" required
+                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                <p id="postcodeError" class="text-red-500 text-sm mt-1 hidden">Please enter a valid UK postcode</p>
+            </div>
+
+            <div id="mpInfo" class="hidden">
+                <h2 class="font-medium text-gray-700">Your MP:</h2>
+                <p id="mpDetails" class="text-gray-900"></p>
+            </div>
+
+            <div id="messagePreview" class="hidden mt-4 p-4 bg-gray-50 rounded-md">
+                <h2 class="font-medium text-gray-700 mb-2">Message Preview:</h2>
+                <p id="previewText" class="text-gray-900"></p>
+            </div>
+
+            <button type="submit" id="submitButton"
+                class="w-full bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                Contact MP
+            </button>
+        </form>
+
+        <div id="loadingOverlay" class="hidden fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center">
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-white"></div>
+        </div>
+    </div>
+
+    <script>
+        const form = document.getElementById('form');
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        const submitButton = document.getElementById('submitButton');
+        const mpInfo = document.getElementById('mpInfo');
+        const mpDetails = document.getElementById('mpDetails');
+        const messagePreview = document.getElementById('previewText');
+        const postcodeRegex = /^[A-Z]{1,2}\d[A-Z\d]? ?\d[A-Z]{2}$/i;
+
+        async function validateInput() {
+            const postcode = document.getElementById('postcode').value.trim();
+            if (!postcodeRegex.test(postcode)) {
+                document.getElementById('postcodeError').classList.remove('hidden');
+                return false;
+            }
+            return true;
+        }
+
+        function updateMessagePreview(name, mpName) {
+            const message = `Dear ${mpName},\n\nMy name is ${name} and I am your constituent. I am writing to express my concerns about climate change...`;
+            messagePreview.textContent = message;
+            document.getElementById('messagePreview').classList.remove('hidden');
+        }
+
+        // Your existing script content here
+        // (keep all the functions you shared: lookupMP, debounce, and event listeners)
+    </script>
 </body>
 </html>
