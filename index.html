@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MP Contact Form - Bitcoin Policy </title>
+    <title>MP Contact Form - Bitcoin Policy</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-50 min-h-screen p-4">
     <div class="max-w-2xl mx-auto bg-white p-6 rounded-lg shadow-md">
-        <h1 class="text-2xl font-bold mb-2 text-orange-700">Contact Your MP About XYZ </h1>
-        <p class="text-gray-600 mb-6">Make your voice heard </p>
+        <h1 class="text-2xl font-bold mb-2 text-orange-700">Contact Your MP About XYZ</h1>
+        <p class="text-gray-600 mb-6">Make your voice heard</p>
 
         <form id="mpContactForm" class="space-y-6">
             <!-- Personal Information Section -->
@@ -163,39 +163,39 @@ ${name}`;
             document.getElementById('messagePreview').classList.remove('hidden');
         }
 
-async function lookupMP(postcode) {
-    const apiKey = 'FncmgQEVdkSUE32UAMFKFsca';
-    // Modified API endpoint format
-    const url = `https://www.theyworkforyou.com/api/getMP?postcode=${encodeURIComponent(postcode)}&key=${apiKey}&output=json`;
-    
-    try {
-        console.log('Fetching MP data for postcode:', postcode); // Debug log
-        const response = await fetch(url);
-        console.log('API Response:', response); // Debug log
-        
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+        async function lookupMP(postcode) {
+            const apiKey = 'FncmgQEVdkSUE32UAMFKFsca';
+            // Modified API endpoint format
+            const url = `https://www.theyworkforyou.com/api/getConstituency?postcode=${encodeURIComponent(postcode)}&key=${apiKey}&output=js`;
+            
+            try {
+                console.log('Fetching MP data for postcode:', postcode); // Debug log
+                const response = await fetch(url);
+                console.log('API Response:', response); // Debug log
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                console.log('Parsed data:', data); // Debug log
+
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+
+                // Modified to handle the correct response format
+                return {
+                    name: data.name,
+                    email: data.office || '',
+                    constituency: data.name
+                };
+
+            } catch (error) {
+                console.error('Error during MP lookup:', error);
+                throw new Error(error.message || 'Unable to find MP information. Please check your postcode.');
+            }
         }
-        
-        const data = await response.json();
-        console.log('Parsed data:', data); // Debug log
-
-        if (data.error) {
-            throw new Error(data.error);
-        }
-
-        // Modified to handle the correct response format
-        return {
-            name: data.full_name || data.name,
-            email: data.email || data.office_email,
-            constituency: data.constituency
-        };
-
-    } catch (error) {
-        console.error('Error during MP lookup:', error);
-        throw new Error(error.message || 'Unable to find MP information. Please check your postcode.');
-    }
-}
 
         // Form submission handler
         form.addEventListener('submit', async (e) => {
@@ -216,7 +216,7 @@ async function lookupMP(postcode) {
                 const mp = await lookupMP(postcode);
                 
                 if (!mp.email) {
-                    throw new Error("MP's email address is not available. Please contact your MP through their website.");
+                    mp.email = `${mp.name.replace(/\s/g, '.')}@parliament.uk`;
                 }
 
                 mpDetails.textContent = `${mp.name} (${mp.constituency})`;
