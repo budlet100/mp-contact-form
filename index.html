@@ -157,14 +157,14 @@
 
             return {
                 name: data.full_name,
-                constituency: data.constituency
+                constituency: data.constituency,
+                personId: data.person_id
             };
         }
 
-        async function searchMPEmail(name) {
-            const query = `${encodeURIComponent(name)} Parliamentary email address`;
-            const url = `https://www.google.com/search?q=${query}`;
-
+        async function getMPContactPage(mpId) {
+            const url = `https://members.parliament.uk/member/${mpId}/contact`;
+            
             try {
                 const response = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(url)}`);
                 const data = await response.json();
@@ -173,25 +173,14 @@
                 const parser = new DOMParser();
                 const doc = parser.parseFromString(html, 'text/html');
 
-                const linkElement = doc.querySelector('a');
-                if (linkElement) {
-                    const emailPageUrl = linkElement.href;
-                    const emailPageResponse = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(emailPageUrl)}`);
-                    const emailPageData = await emailPageResponse.json();
-                    const emailPageHtml = emailPageData.contents;
-
-                    const emailRegex = /([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+)/gi;
-                    const emailMatch = emailRegex.exec(emailPageHtml);
-                    if (emailMatch && emailMatch[1]) {
-                        return emailMatch[1];
-                    } else {
-                        throw new Error('Email address not found on the page');
-                    }
+                const emailElement = doc.querySelector('a[href^="mailto:"]');
+                if (emailElement) {
+                    return emailElement.href.replace('mailto:', '');
                 } else {
-                    throw new Error('Email address page not found');
+                    throw new Error('Email address not found on the contact page');
                 }
             } catch (error) {
-                console.error('Error searching MP email:', error);
+                console.error('Error retrieving MP contact page:', error);
                 return null;
             }
         }
@@ -215,16 +204,16 @@
 
             mpDetails.textContent = `${mp.name} (${mp.constituency})`;
             
-            // Search for the MP's email address
-            const emailAddress = await searchMPEmail(mp.name);
+            // Get the MP's contact page and extract the email address
+            const emailAddress = await getMPContactPage(mp.personId);
             if (emailAddress) {
                 const subject = encodeURIComponent('Constituent Inquiry');
                 const body = encodeURIComponent(`Dear ${mp.name},\n\nI am writing to you as a concerned constituent regarding...\n\nSincerely,\n${name}`);
                 emailLink.href = `mailto:${emailAddress}?subject=${subject}&body=${body}`;
                 emailLink.textContent = 'Email your MP';
             } else {
-                emailLink.href = '#';
-                emailLink.textContent = 'Email address not found';
+                emailLink.href = `https://members.parliament.uk/member/${mp.personId}/contact`;
+                emailLink.textContent = 'Visit MP\'s contact page';
             }
 
             // Generate message preview
