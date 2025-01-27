@@ -184,7 +184,7 @@
         }
 
         function findMPEmail(name) {
-            const mp = mpData.find(mp => mp.Forename.toLowerCase() + ' ' + mp.Surname.toLowerCase() === name.toLowerCase());
+            const mp = mpData.find(mp => `${mp.Forename} ${mp.Surname}`.toLowerCase() === name.toLowerCase());
             return mp ? mp.Email : null;
         }
 
