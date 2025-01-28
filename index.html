@@ -121,7 +121,7 @@
         });
 
         async function getMpData(mpName) {
-            const response = await fetch('15.10.24.csv');
+            const response = await fetch('https://github.com/budlet100/mp-contact-form/blob/main/15.10.24.csv');
             const csvData = await response.text();
             const rows = csvData.split('\n').slice(1);
 
