@@ -1,52 +1,42 @@
-
-Overview
-This project provides a web-based form for users to contact their UK Member of Parliament (MP) about Bitcoin policy. Key features include:
-Collects user details: name, email, and postcode.
-Uses the TheyWorkForYou API to fetch MP information based on the postcode.
-Sources MP email addresses from a hardcoded CSV within the script.
+MP Contact Form 
+A simple web form for users to contact their UK Member of Parliament (MP) about Bitcoin policy, built with HTML, Tailwind CSS, and JavaScript.
+✨ Features
+Collects user details: name, email, and UK postcode.
+Fetches MP information using the TheyWorkForYou API.
+Displays MP details with a clickable email link for direct contact.
 Includes GDPR consent for data processing compliance.
-Installation and Setup
-Dependencies
-Internet Connection: Required for Tailwind CSS, loaded via CDN (https://cdn.tailwindcss.com).
-Local Server: Not required; the file can run as a static HTML page in a browser.
-API Key
-Obtain an API key from TheyWorkForYou for the MP lookup feature.
-Replace the hardcoded key (FncmgQEVdkSUE32UAMFKFsca) in the JavaScript with your own for security in production.
+Sources MP email addresses from a hardcoded CSV (with an option to upgrade to a database).
+🚀 Getting Started
+Prerequisites
+An internet connection for Tailwind CSS (loaded via CDN: https://cdn.tailwindcss.com).
+No local server required; runs as a static HTML file in a browser.
+API Key Setup
+Get an API key from TheyWorkForYou.
+Replace the hardcoded key (FncmgQEVdkSUE32UAMFKFsca) in the JavaScript with your own key for security.
 Usage
 Open the HTML file in a web browser.
-Fill in the form with:
-Your full name.
-Your email address.
-Your UK postcode.
-Check the GDPR consent box to agree to data processing for contacting your MP.
-Click "Find My MP" to submit the form.
-View your MP's details (name, constituency) and use the provided clickable email link with a pre-filled subject and body to contact them.
-Technical Details
-Technologies
-HTML5: For the structure of the form.
-Tailwind CSS: For styling, loaded via CDN.
-Vanilla JavaScript: For form handling and API integration.
+Enter your name, email, and UK postcode.
+Check the GDPR consent box.
+Click "Find My MP" to submit.
+View your MP's details (name, constituency) and use the email link to contact them.
+🛠️ Technical Details
+Built With
+HTML5: Form structure.
+Tailwind CSS: Styling (via CDN).
+JavaScript: Form handling and API integration.
 API Integration
-Endpoint: Uses the TheyWorkForYou API at https://www.theyworkforyou.com/api/getMP?postcode=${postcode}&key=${apiKey} to fetch MP data by postcode.
-Limitation: The API does not provide email addresses, so these are sourced from a hardcoded CSV.
-Hardcoded Data and API Source
-Current Implementation
-The JavaScript includes a CSV string with MP details (forename, surname, constituency, email).
-This CSV is used to match the API-returned MP name to an email address, as the TheyWorkForYou API excludes emails.
-API for Updates
-To replace the hardcoded CSV, use the UK Parliament dataset available at data.parliament.uk.
-This dataset provides current MP names, constituencies, and email addresses in CSV format.
-Creating a Database for Automatic Updates
-To avoid manual updates to the CSV, you can set up a database with the following steps:
-Data Source:
-Download the latest MPs dataset from data.parliament.uk in CSV format.
-Setup:
-Parse the CSV and store it in a local database (e.g., SQLite) or a JSON file.
-Include fields: Forename, Surname, Constituency, Email.
-Automation:
-Use a script (e.g., Python) and a scheduled task (e.g., cron job) to periodically (e.g., weekly) fetch and update the database with the latest data.
-Integration:
-Modify the JavaScript function getMpData to query this database instead of the CSV string.
-Notes
-Data Compliance: Ensure compliance with data.parliament.uk usage policies when automating updates.
-Security: For production, secure the API key by moving API calls to a server-side script to prevent exposure in client-side code.
+Endpoint: https://www.theyworkforyou.com/api/getMP?postcode=${postcode}&key=${apiKey}
+Limitation: The TheyWorkForYou API does not provide email addresses, so these are sourced from a hardcoded CSV in the script.
+📊 Managing MP Data
+Current Approach: Hardcoded CSV
+The script includes a CSV string with MP details (forename, surname, constituency, email).
+Used to match the API-returned MP name to an email address.
+Upgrading to a Database
+To keep MP data up-to-date without manual updates:
+Source: Download the latest MP dataset in CSV format from data.parliament.uk.
+Storage: Parse the CSV and store in a local database (e.g., SQLite) or JSON file with fields: Forename, Surname, Constituency, Email.
+Automation: Use a script (e.g., Python) with a scheduled task (e.g., cron job) to update the database weekly.
+Integration: Update the getMpData function in the JavaScript to query the database instead of the CSV.
+⚠️ Important Notes
+Data Compliance: Follow data.parliament.uk usage policies for automated updates.
+Security: In production, secure the API key by handling API calls server-side to avoid exposure in client-side code.
