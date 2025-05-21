@@ -112,29 +112,6 @@
             return /^[A-Z]{1,2}\d[A-Z\d]? \d[A-Z]{2}$/i.test(postcode);
         }
 
-        // Simple heuristic to determine Mr./Ms. based on forename
-        function getTitle(forename) {
-            const commonFemaleNames = [
-                "Diane", "Heidi", "Rushanara", "Rosena", "Fleur", "Victoria", "Catherine", "Olivia",
-                "Harriett", "Antonia", "Jess", "Lorraine", "Apsana", "Alison", "Siân", "Polly", "Olivia",
-                "Rachel", "Elsie", "Sarah", "Jade", "Sureena", "Karen", "Aphra", "Suella", "Jess", "Julia",
-                "Maureen", "Dawn", "Ruth", "Nesil", "Irene", "Juliet", "Charlotte", "Wendy", "Sarah",
-                "Bambos", "Ellie", "Feryal", "Carla", "Samantha", "Anneliese", "Helena", "Maria", "Sorcha",
-                "Cat", "Lauren", "Sarah", "Maya", "Kirith", "Florence", "Kate", "Kate", "Miatta", "Linsey",
-                "Natalie", "Emma", "Catherine", "Vicky", "Mary", "Zöe", "Gill", "Anna", "Sarah", "Lilian",
-                "Nia", "Alison", "Amanda", "Louise", "Sarah", "Paulette", "Claire", "Monica", "Emma",
-                "Carolyn", "Rebecca", "Helen", "Claire", "Pippa", "Meg", "Sharon", "Rachel", "Wera", "Natasha",
-                "Sally", "Christine", "Liz", "Caroline", "Diana", "Kim", "Lillian", "Louise", "Ruth", "Sarah",
-                "Satvir", "Alicia", "Liz", "Naushabah", "Jayne", "Gen", "Sonia", "Uma", "Laura", "Katie",
-                "Abena", "Kate", "Kate", "Taiwo", "Sarah", "Priti", "Rebecca", "Stephanie", "Manuela", "Jess",
-                "Bridget", "Ellie", "Rachel", "Joani", "Emma", "Bell", "Jenny", "Lucy", "Marie", "Anna", "Sarah",
-                "Roz", "Liz", "Michelle", "Naz", "Tulip", "Vikki", "Lisa", "Cat", "Rebecca", "Sarah", "Karin",
-                "Kirsteen", "Lauren", "Zarah", "Jo", "Elaine", "Susan", "Katrina", "Melanie", "Michelle",
-                "Catherine", "Helen", "Jo", "Katie", "Nadia", "Munira", "Claire", "Yuan"
-            ];
-            return commonFemaleNames.includes(forename) ? "Ms." : "Mr.";
-        }
-
         // Blur event listeners for validation
         const nameInput = document.getElementById('name');
         const emailInput = document.getElementById('email');
@@ -253,12 +230,12 @@
             const selectedPolicy = document.querySelector('input[name="policy"]:checked').value;
 
             if (mpDataResult && mpDataResult.Email) {
-                const mpTitle = getTitle(mpDataResult.Forename);
+                const mpFirstName = mpDataResult.Forename;
                 const mpLastName = mpDataResult.Surname;
                 const policy = selectedPolicy;
                 const letter = letters[policy];
                 const emailBody = encodeURIComponent(
-                    `Dear ${mpTitle} ${mpLastName},\n\n${letter}\n\nSincerely,\n${userName}`
+                    `Dear ${mpFirstName} ${mpLastName},\n\n${letter}\n\nSincerely,\n${userName}`
                 );
                 const mailtoLink = `mailto:${mpDataResult.Email}?subject=Concerns%20about%20${encodeURIComponent(policy)}&body=${emailBody}`;
                 window.location.href = mailtoLink; // Directly open the email client
