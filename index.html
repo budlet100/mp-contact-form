@@ -108,8 +108,27 @@
             return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
         }
 
+        function normalizePostcode(postcode) {
+            const cleaned = postcode.trim().toUpperCase().replace(/\s+/g, '');
+            const postcodeRegex = /^[A-Z]{1,2}[0-9][A-Z0-9]?[0-9][A-Z]{2}$/;
+            if (!postcodeRegex.test(cleaned)) {
+                return null;
+            }
+            // Add a space before the last 3 characters (e.g., "RH183SA" → "RH18 3SA")
+            return cleaned.replace(/(.{3})$/, ' $1');
+        }
+
         function isValidPostcode(postcode) {
-            return /^[A-Z]{1,2}\d[A-Z\d]? \d[A-Z]{2}$/i.test(postcode);
+            return normalizePostcode(postcode) !== null;
+        }
+
+        // Capitalize user name (e.g., "ian brown" → "Ian Brown")
+        function capitalizeName(name) {
+            return name
+                .trim()
+                .split(/\s+/)
+                .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+                .join(' ');
         }
 
         // Blur event listeners for validation
@@ -141,14 +160,13 @@
 
         postcodeInput.addEventListener('blur', () => {
             const postcode = postcodeInput.value.trim();
-            if (!postcode) {
-                document.getElementById('postcodeError').textContent = 'Please enter your postcode';
-                document.getElementById('postcodeError').classList.remove('hidden');
-            } else if (!isValidPostcode(postcode)) {
+            const normalized = normalizePostcode(postcode);
+            if (!normalized) {
                 document.getElementById('postcodeError').textContent = 'Please enter a valid UK postcode';
                 document.getElementById('postcodeError').classList.remove('hidden');
             } else {
                 document.getElementById('postcodeError').classList.add('hidden');
+                postcodeInput.value = normalized; // Update input field with normalized format
             }
         });
 
@@ -194,7 +212,13 @@
                 document.getElementById('policyError').classList.add('hidden');
             }
 
-            const postcode = document.getElementById('postcode').value;
+            const postcode = normalizePostcode(document.getElementById('postcode').value);
+            if (!postcode) {
+                document.getElementById('postcodeError').textContent = 'Please enter a valid UK postcode';
+                document.getElementById('postcodeError').classList.remove('hidden');
+                return;
+            }
+
             const apiKey = 'FncmgQEVdkSUE32UAMFKFsca'; // TODO: Secure this API key
             const apiUrl = `https://www.theyworkforyou.com/api/getMP?postcode=${postcode}&key=${apiKey}`;
 
@@ -226,7 +250,7 @@
                 return;
             }
 
-            const userName = document.getElementById('name').value.trim();
+            const userName = capitalizeName(document.getElementById('name').value);
             const selectedPolicy = document.querySelector('input[name="policy"]:checked').value;
 
             if (mpDataResult && mpDataResult.Email) {
