@@ -5,10 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MP Contact Form - Bitcoin Policy</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
 </head>
 <body class="bg-gray-50 min-h-screen p-4">
     <div class="max-w-2xl mx-auto bg-white p-6 rounded-lg shadow-md">
-        <h1 class="text-2xl font-bold mb-2 text-orange-700">Contact Your MP About XYZ</h1>
+        <h1 class="text-2xl font-bold mb-2 text-orange-700">Contact Your MP About Bitcoin Policy</h1>
         <p class="text-gray-600 mb-6">Make your voice heard</p>
 
         <form id="mpContactForm" class="space-y-6">
@@ -39,6 +40,28 @@
                             placeholder="e.g., SW1A 1AA">
                         <p id="postcodeError" class="hidden text-red-500 text-sm mt-1">Please enter a valid UK postcode</p>
                     </div>
+
+                    <div>
+                        <h3 class="text-sm font-medium text-gray-700">Select a policy issue to contact your MP about:</h3>
+                        <div class="mt-2 space-y-2">
+                            <div class="flex items-center">
+                                <input id="cbdcPolicy" name="policy" type="radio" value="CBDC Policy" required
+                                    class="h-4 w-4 text-orange-600 focus:ring-orange-500 border-gray-300">
+                                <label for="cbdcPolicy" class="ml-2 block text-sm text-gray-900">CBDC Policy</label>
+                            </div>
+                            <div class="flex items-center">
+                                <input id="btcPolicy" name="policy" type="radio" value="BTC Policy"
+                                    class="h-4 w-4 text-orange-600 focus:ring-orange-500 border-gray-300">
+                                <label for="btcPolicy" class="ml-2 block text-sm text-gray-900">BTC Policy</label>
+                            </div>
+                            <div class="flex items-center">
+                                <input id="taxPolicy" name="policy" type="radio" value="Tax Policy"
+                                    class="h-4 w-4 text-orange-600 focus:ring-orange-500 border-gray-300">
+                                <label for="taxPolicy" class="ml-2 block text-sm text-gray-900">Tax Policy</label>
+                            </div>
+                        </div>
+                        <p id="policyError" class="hidden text-red-500 text-sm mt-1">Please select a policy issue</p>
+                    </div>
                 </div>
             </div>
 
@@ -51,32 +74,10 @@
                 </p>
             </div>
 
-            <!-- Message Preview -->
-            <div id="messagePreview" class="hidden bg-gray-50 p-4 rounded-lg">
-                <h2 class="text-lg font-semibold mb-2 text-gray-700">Your Message Preview</h2>
-                <div id="previewText" class="text-gray-800 whitespace-pre-line bg-white p-4 rounded border"></div>
-            </div>
-
-            <!-- GDPR Consent -->
-            <div class="bg-blue-50 p-4 rounded-lg">
-                <div class="flex items-start">
-                    <div class="flex items-center h-5">
-                        <input id="gdprConsent" name="gdprConsent" type="checkbox" required
-                            class="focus:ring-orange-500 h-4 w-4 text-orange-600 border-gray-300 rounded">
-                    </div>
-                    <div class="ml-3 text-sm">
-                        <label for="gdprConsent" class="font-medium text-gray-700">GDPR Consent *</label>
-                        <p class="text-gray-500">I consent to my personal data being processed for the purpose of contacting my MP. 
-                            This data will not be shared with third parties or used for any other purpose.</p>
-                    </div>
-                </div>
-                <p id="gdprError" class="hidden text-red-500 text-sm mt-1">Please accept the GDPR consent to proceed</p>
-            </div>
-
             <!-- Submit Button -->
             <button type="submit" id="submitButton"
                 class="w-full bg-orange-600 text-white py-3 px-4 rounded-md hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 transition-colors disabled:bg-gray-400">
-                Find My MP
+                Contact My MP
             </button>
         </form>
     </div>
@@ -86,687 +87,136 @@
         const mpInfo = document.getElementById('mpInfo');
         const mpDetails = document.getElementById('mpDetails');
         const emailLink = document.getElementById('emailLink');
-        const messagePreview = document.getElementById('messagePreview');
-        const previewText = document.getElementById('previewText');
-        const submitButton = document.getElementById('submitButton');
 
-        const csvData = `
-        Forename,Surname,Constituency,Email
-Diane,Abbott,Hackney North and Stoke Newington,diane.abbott.office@parliament.uk
-Jack,Abbott,Ipswich,jack.abbott.mp@parliament.uk
-Debbie,Abrahams,Oldham East and Saddleworth,abrahamsd@parliament.uk
-Shockat,Adam,Leicester South,shockat.adam.mp@parliament.uk
-Zubir,Ahmed,Glasgow South West,zubir.ahmed.mp@parliament.uk
-Luke,Akehurst,North Durham,luke.akehurst.mp@parliament.uk
-Bayo,Alaba,Southend East and Rochford,bayo.alaba.mp@parliament.uk
-Dan,Aldridge,Weston-super-Mare,daniel.aldridge.mp@parliament.uk
-Douglas,Alexander,Lothian East,douglas.alexander.mp@parliament.uk
-Heidi,Alexander,Swindon South,heidi.alexander.mp@parliament.uk
-Sadik,Al-Hassan,North Somerset,sadik.alhassan.mp@parliament.uk
-Rushanara,Ali,Bethnal Green and Stepney,rushanara.ali.mp@parliament.uk
-Tahir,Ali,Birmingham Hall Green and Moseley,tahir.ali.mp@parliament.uk
-Rosena,Allin-Khan,Tooting,rosena.allinkhan.mp@parliament.uk
-Jim,Allister,North Antrim,jim.allister.mp@parliament.uk
-Mike,Amesbury,Runcorn and Helsby,mike.amesbury.mp@parliament.uk
-Gideon,Amos,Taunton and Wellington,gideon.amos.mp@parliament.uk
-Callum,Anderson,Buckingham and Bletchley,callum.anderson.mp@parliament.uk
-Fleur,Anderson,Putney,fleur.anderson.mp@parliament.uk
-Lee,Anderson,Ashfield,lee.anderson.mp@parliament.uk
-Stuart,Anderson,South Shropshire,stuart.anderson.mp@parliament.uk
-Stuart,Andrew,Daventry,stuart.andrew.mp@parliament.uk
-Tonia,Antoniazzi,Gower,tonia.antoniazzi.mp@parliament.uk
-Steff,Aquarone,North Norfolk,steff.aquarone.mp@parliament.uk
-Edward,Argar,Melton and Syston,edward.argar.mp@parliament.uk
-Scott,Arthur,Edinburgh South West,scott.arthur.mp@parliament.uk
-Jess,Asato,Lowestoft,jess.asato.mp@parliament.uk
-James,Asser,West Ham and Beckton,james.asser.mp@parliament.uk
-Jas,Athwal,Ilford South,jas.athwal.mp@parliament.uk
-Victoria,Atkins,Louth and Horncastle,Victoria@victoriaatkins.org.uk
-Catherine,Atkinson,Derby North,catherine.atkinson.mp@parliament.uk
-Lewis,Atkinson,Sunderland Central,lewis.atkinson.mp@parliament.uk
-Josh,Babarinde,Eastbourne,josh.babarinde.mp@parliament.uk
-Gareth,Bacon,Orpington,gareth.bacon.mp@parliament.uk
-Kemi,Badenoch,North West Essex,kemi.badenoch.mp@parliament.uk
-Calvin,Bailey,Leyton and Wanstead,calvin.bailey.mp@parliament.uk
-Olivia,Bailey,Reading West and Mid Berkshire,olivia.bailey.mp@parliament.uk
-David,Baines,St Helens North,david.baines.mp@parliament.uk
-Alex,Baker,Aldershot,alex.baker.mp@parliament.uk
-Richard,Baker,Glenrothes and Mid Fife,richard.baker.mp@parliament.uk
-Harriett,Baldwin,West Worcestershire,harriett.baldwin.mp@parliament.uk
-Alex,Ballinger,Halesowen,alex.ballinger.mp@parliament.uk
-Antonia,Bance,Tipton and Wednesbury,antonia.bance.mp@parliament.uk
-Steve,Barclay,North East Cambridgeshire,stephen.barclay.mp@parliament.uk
-Paula,Barker,Liverpool Wavertree,paula.barker.mp@parliament.uk
-Lee,Barron,Corby and East Northamptonshire,lee.barron.mp@parliament.uk
-Alex,Barros-Curtis,Cardiff West,alex.barroscurtis.mp@parliament.uk
-Johanna,Baxter,Paisley and Renfrewshire South,johanna.baxter.mp@parliament.uk
-Danny,Beales,Uxbridge and South Ruislip,danny.beales.mp@parliament.uk
-Lorraine,Beavers,Blackpool North and Fleetwood,lorraine.beavers.mp@parliament.uk
-Peter,Bedford,Mid Leicestershire,peter.bedford.mp@parliament.uk
-Órfhlaith,Begley,West Tyrone,
-Apsana,Begum,Poplar and Limehouse,apsana.begum.mp@parliament.uk
-Torsten,Bell,Swansea West,torsten.bell.mp@parliament.uk
-Hilary,Benn,Leeds South,bennh@parliament.uk
-Alison,Bennett,Mid Sussex,alison.bennett.mp@parliament.uk
-Siân,Berry,Brighton Pavilion,sian.berry.mp@parliament.uk
-Clive,Betts,Sheffield South East,officeofclivebettsmp@parliament.uk
-Saqib,Bhatti,Meriden and Solihull East,saqib.bhatti@parliament.uk
-Polly,Billington,East Thanet,polly.billington.mp@parliament.uk
-Matt,Bishop,Forest of Dean,matt.bishop.mp@parliament.uk
-Bob,Blackman,Harrow East,bob.blackman.mp@parliament.uk
-Kirsty,Blackman,Aberdeen North,kirsty.blackman.mp@parliament.uk
-Olivia,Blake,Sheffield Hallam,olivia.blake.mp@parliament.uk
-Rachel,Blake,Cities of London and Westminster,rachel.blake.mp@parliament.uk
-Chris,Bloore,Redditch,chris.bloore.mp@parliament.uk
-Elsie,Blundell,Heywood and Middleton North,elsie.blundell.mp@parliament.uk
-Kevin,Bonavia,Stevenage,kevin.bonavia.mp@parliament.uk
-Sarah,Bool,South Northamptonshire,sarah.bool.mp@parliament.uk
-Jade,Botterill,Ossett and Denby Dale,jade.botterill.mp@parliament.uk
-Andrew,Bowie,West Aberdeenshire and Kincardine,andrew.bowie.mp@parliament.uk
-Sureena,Brackenridge,Wolverhampton North East,sureena.brackenridge.mp@parliament.uk
-Karen,Bradley,Staffordshire Moorlands,karen.bradley.mp@parliament.uk
-Aphra,Brandreth,Chester South and Eddisbury,aphra.brandreth.mp@parliament.uk
-Jonathan,Brash,Hartlepool,jonathan.brash.mp@parliament.uk
-Suella,Braverman,Fareham and Waterlooville,suella.braverman.mp@parliament.uk
-Alex,Brewer,North East Hampshire,alex.brewer.mp@parliament.uk
-Phil,Brickell,Bolton West,phil.brickell.mp@parliament.uk
-Jess,Brown-Fuller,Chichester,jess.brownfuller.mp@parliament.uk
-Chris,Bryant,Rhondda and Ogmore,chris.bryant.mp@parliament.uk
-Julia,Buckley,Shrewsbury,julia.buckley.mp@parliament.uk
-Alex,Burghart,Brentwood and Ongar,alex.burghart.mp@parliament.uk
-Richard,Burgon,Leeds East,richard@richardburgon.com
-Maureen,Burke,Glasgow North East,maureen.burke.mp@parliament.uk
-David,Burton-Sampson,Southend West and Leigh,david.burtonsampson.mp@parliament.uk
-Dawn,Butler,Brent East,dawn.butler.mp@parliament.uk
-Ian,Byrne,Liverpool West Derby,ian.byrne.mp@parliament.uk
-Liam,Byrne,Birmingham Hodge Hill and Solihull North,liam.byrne.mp@parliament.uk
-Ruth,Cadbury,Brentford and Isleworth,ruthcadburymp@parliament.uk
-Nesil,Caliskan,Barking,nesil.caliskan.mp@parliament.uk
-Alan,Campbell,Tynemouth,alan.campbell.mp@parliament.uk
-Gregory,Campbell,East Londonderry,aaron.callan@parliament.uk
-Irene,Campbell,North Ayrshire and Arran,irene.campbell.mp@parliament.uk
-Juliet,Campbell,Broxtowe,juliet.campbell.mp@parliament.uk
-Markus,Campbell-Savours,Penrith and Solway,markus.campbellsavours.mp@parliament.uk
-Charlotte,Cane,Ely and East Cambridgeshire,charlotte.cane.mp@parliament.uk
-Dan,Carden,Liverpool Walton,dan.carden.mp@parliament.uk
-Sam,Carling,North West Cambridgeshire,sam.carling.mp@parliament.uk
-Alistair,Carmichael,Orkney and Shetland,carmichaela@parliament.uk
-Al,Carns,Birmingham Selly Oak,al.carns.mp@parliament.uk
-James,Cartlidge,South Suffolk,james.cartlidge.mp@parliament.uk
-David,Chadwick,"Brecon, Radnor and Cwm Tawe",david.chadwick.mp@parliament.uk
-Wendy,Chamberlain,North East Fife,wendy.chamberlain.mp@parliament.uk
-Danny,Chambers,Winchester,danny.chambers.mp@parliament.uk
-Sarah,Champion,Rotherham,sarah.champion.mp@parliament.uk
-Bambos,Charalambous,Southgate and Wood Green,bambos.charalambous.mp@parliament.uk
-Luke,Charters,York Outer,luke.charters.mp@parliament.uk
-Christopher,Chope,Christchurch,chopec@parliament.uk
-Ellie,Chowns,North Herefordshire,ellie.chowns.mp@parliament.uk
-Feryal,Clark,Enfield North,feryal.clark.mp@parliament.uk
-James,Cleverly,Braintree,james.cleverly.mp@parliament.uk
-Geoffrey,Clifton-Brown,North Cotswolds,cliftonbrowng@parliament.uk
-Lewis,Cocking,Broxbourne,lewis.cocking.mp@parliament.uk
-Chris,Coghlan,Dorking and Horley,chris.coghlan.mp@parliament.uk
-Ben,Coleman,Chelsea and Fulham,ben.coleman.mp@parliament.uk
-Jacob,Collier,Burton and Uttoxeter,jacob.collier.mp@parliament.uk
-Lizzi,Collinge,Morecambe and Lunesdale,lizzi.collinge.mp@parliament.uk
-Tom,Collins,Worcester,tom.collins.mp@parliament.uk
-Victoria,Collins,Harpenden and Berkhamsted,victoria.collins.mp@parliament.uk
-Liam,Conlon,Beckenham and Penge,liam.conlon.mp@parliament.uk
-Sarah,Coombes,West Bromwich,sarah.coombes.mp@parliament.uk
-Andrew,Cooper,Mid Cheshire,andrew.cooper.mp@parliament.uk
-Beccy,Cooper,Worthing West,beccy.cooper.mp@parliament.uk
-Daisy,Cooper,St Albans,daisy.cooper.mp@parliament.uk
-John,Cooper,Dumfries and Galloway,john.cooper.mp@parliament.uk
-Yvette,Cooper,"Pontefract, Castleford and Knottingley",coopery@parliament.uk
-Jeremy,Corbyn,Islington North,jeremy.corbyn.mp@parliament.uk
-Alberto,Costa,South Leicestershire,alberto.costa.mp@parliament.uk
-Deirdre,Costigan,Ealing Southall,deirdre.costigan.mp@parliament.uk
-Claire,Coutinho,East Surrey,claire.coutinho.mp@parliament.uk
-Geoffrey,Cox,Torridge and Tavistock,coxg@parliament.uk
-Pam,Cox,Colchester,pam.cox.mp@parliament.uk
-Neil,Coyle,Bermondsey and Old Southwark,neil.coyle.mp@parliament.uk
-Jen,Craft,Thurrock,jen.craft.mp@parliament.uk
-Mary,Creagh,Coventry East,mary.creagh.mp@parliament.uk
-Stella,Creasy,Walthamstow,stella.creasy.mp@parliament.uk
-Torcuil,Crichton,Na h-Eileanan an Iar,torcuil.crichton.mp@parliament.uk
-Harriet,Cross,Gordon and Buchan,harriet.cross.mp@parliament.uk
-Pat,Cullen,Fermanagh and South Tyrone,pat.cullen.mp@parliament.uk
-Judith,Cummins,Bradford South,judith.cummins.mp@parliament.uk
-Chris,Curtis,Milton Keynes North,chris.curtis.mp@parliament.uk
-Janet,Daby,Lewisham East,janet.daby.mp@parliament.uk
-Nicholas,Dakin,Scunthorpe,nic.dakin.mp@parliament.uk
-Ashley,Dalton,West Lancashire,ashley.dalton.mp@parliament.uk
-Adam,Dance,Yeovil,adam.dance.mp@parliament.uk
-Steve,Darling,Torbay,steve.darling.mp@parliament.uk
-Emily,Darlington,Milton Keynes Central,emily.darlington.mp@parliament.uk
-Ed,Davey,Kingston and Surbiton,edward.davey.mp@parliament.uk
-Ann,Davies,Caerfyrddin,ann.davies.mp@parliament.uk
-Gareth,Davies,Grantham and Bourne,gareth.davies.mp@parliament.uk
-Jonathan,Davies,Mid Derbyshire,jonathan.davies.mp@parliament.uk
-MiDavies,Davies,East Grinstead and Uckfield,mims.davies.mp@parliament.uk
-Paul,Davies,Colne Valley,paul.davies.mp@parliament.uk
-Shaun,Davies,Telford,shaun.davies.mp@parliament.uk
-Alex,Davies-Jones,Pontypridd,alex.daviesjones.mp@parliament.uk
-David,Davis,Goole and Pocklington,david.davis.mp@parliament.uk
-Marsha,De Cordova,Battersea,marsha.decordova.mp@parliament.uk
-Bobby,Dean,Carshalton and Wallington,bobby.dean.mp@parliament.uk
-Josh,Dean,Hertford and Stortford,josh.dean.mp@parliament.uk
-Kate,Dearden,Halifax,kate.dearden.mp@parliament.uk
-Carla,Denyer,Bristol Central,carla.denyer.mp@parliament.uk
-Charlie,Dewhirst,Bridlington and The Wolds,charlie.dewhirst.mp@parliament.uk
-Tanmanjeet,Singh Dhesi,Slough,tan.dhesi.mp@parliament.uk
-Jim,Dickson,Dartford,jim.dickson.mp@parliament.uk
-Lee,Dillon,Newbury,lee.dillon.mp@parliament.uk
-Caroline,Dinenage,Gosport,caroline.dinenage.mp@parliament.uk
-Anna,Dixon,Shipley,anna.dixon.mp@parliament.uk
-Samantha,Dixon,Chester North and Neston,Samantha.dixon.mp@parliament.uk
-Anneliese,Dodds,Oxford East,anneliese.dodds.mp@parliament.uk
-Helena,Dollimore,Hastings and Rye,helena.dollimore.mp@parliament.uk
-Dave,Doogan,Angus and Perthshire Glens,dave.doogan.mp@parliament.uk
-Stephen,Doughty,Cardiff South and Penarth,stephen.doughty.mp@parliament.uk
-Peter,Dowd,Bootle,peter.dowd.mp@parliament.uk
-Oliver,Dowden,Hertsmere,oliver.dowden.mp@parliament.uk
-Graeme,Downie,Dunfermline and Dollar,graeme.downie.mp@parliament.uk
-Rosie,Duffield,Canterbury,rosie.duffield.mp@parliament.uk
-Iain,Duncan Smith,Chingford and Woodford Green,Iain.duncansmith.mp@parliament.uk
-Neil,Duncan-Jordan,Poole,neil.duncanjordan.mp@parliament.uk
-Sarah,Dyke,Glastonbury and Somerton,sarah.dyke.mp@parliament.uk
-Angela,Eagle,Wallasey,eaglea@parliament.uk
-Maria,Eagle,Liverpool Garston,maria.eagle.mp@parliament.uk
-Alex,Easton,North Down,alex.easton.mp@parliament.uk
-Colum,Eastwood,Foyle,colum.eastwood.mp@parliament.uk
-Sorcha,Eastwood,Lagan Valley,sorcha.eastwood.mp@parliament.uk
-Cat,Eccles,Stourbridge,cat.eccles.mp@parliament.uk
-Lauren,Edwards,Rochester and Strood,lauren.edwards.mp@parliament.uk
-Sarah,Edwards,Tamworth,sarah.edwards.mp@parliament.uk
-Clive,Efford,Eltham and Chislehurst,
-Damien,Egan,Bristol North East,damien.egan.mp@parliament.uk
-Maya,Ellis,Ribble Valley,maya.ellis.mp@parliament.uk
-Chris,Elmore,Bridgend,Chris.Elmore.mp@parliament.uk
-Kirith,Entwistle,Bolton North East,kirith.entwistle.mp@parliament.uk
-Florence,Eshalomi,Vauxhall and Camberwell Green,florence.eshalomi.mp@parliament.uk
-Bill,Esterson,Sefton Central,bill.esterson.mp@parliament.uk
-Chris,Evans,Caerphilly,chris.evans.mp@parliament.uk
-Luke,Evans,Hinckley and Bosworth,luke.evans.mp@parliament.uk
-Miatta,Fahnbulleh,Peckham,miatta.fahnbulleh.mp@parliament.uk
-Hamish,Falconer,Lincoln,hamish.falconer.mp@parliament.uk
-Nigel,Farage,Clacton,nigel.farage.mp@parliament.uk
-Linsey,Farnsworth,Amber Valley,linsey.farnsworth.mp@parliament.uk
-Tim,Farron,Westmorland and Lonsdale,farront@parliament.uk
-Josh,Fenton-Glynn,Calder Valley,josh.fentonglynn.mp@parliament.uk
-Mark,Ferguson,Gateshead Central and Whickham,mark.ferguson.mp@parliament.uk
-Patricia,Ferguson,Glasgow West,patricia.ferguson.mp@parliament.uk
-John,Finucane,Belfast North,john.finucane.mp@parliament.uk
-Natalie,Fleet,Bolsover,natalie.fleet.mp@parliament.uk
-Stephen,Flynn,Aberdeen South,stephen.flynn.mp@parliament.uk
-Emma,Foody,Cramlington and Killingworth,emma.foody.mp@parliament.uk
-Catherine,Fookes,Monmouthshire,catherine.fookes.mp@parliament.uk
-Richard,Foord,Honiton and Sidmouth,richard.foord.mp@parliament.uk
-Will,Forster,Woking,will.forster.mp@parliament.uk
-Peter,Fortune,Bromley and Biggin Hill,peter.fortune.mp@parliament.uk
-Paul,Foster,South Ribble,paul.foster.mp@parliament.uk
-Ashley,Fox,Bridgwater,ashley.fox.mp@parliament.uk
-Vicky,Foxcroft,Lewisham North,vicky.foxcroft.mp@parliament.uk
-Mary,Kelly Foy,City of Durham,mary.foy.mp@parliament.uk
-Daniel,Francis,Bexleyheath and Crayford,daniel.francis.mp@parliament.uk
-Mark,Francois,Rayleigh and Wickford,mark.francois.mp@parliament.uk
-Zöe,Franklin,Guildford,zoe.franklin.mp@parliament.uk
-George,Freeman,Mid Norfolk,george.freeman.mp@parliament.uk
-Louie,French,Old Bexley and Sidcup,louie.french.mp@parliament.uk
-James,Frith,Bury North,james.frith.mp@parliament.uk
-Richard,Fuller,North Bedfordshire,richard.fuller.mp@parliament.uk
-Gill,Furniss,Sheffield Brightside and Hillsborough,gill.furniss.mp@parliament.uk
-Roger,Gale,Herne Bay and Sandwich,galerj@parliament.uk
-Barry,Gardiner,Brent West,barry.gardiner.mp@parliament.uk
-Allison,Gardner,Stoke-on-Trent South,allison.gardner.mp@parliament.uk
-Mark,Garnier,Wyre Forest,mark.garnier.mp@parliament.uk
-Anna,Gelderd,South East Cornwall,anna.gelderd.mp@parliament.uk
-Alan,Gemmell,Central Ayrshire,alan.gemmell.mp@parliament.uk
-Andrew,George,St Ives,andrew.george.mp@parliament.uk
-Gill,German,Clwyd North,gill.german.mp@parliament.uk
-Stephen,Gethins,Arbroath and Broughty Ferry,stephen.gethins.mp@parliament.uk
-Nusrat,Ghani,Sussex Weald,nusrat.ghani.mp@parliament.uk
-Sarah,Gibson,Chippenham,sarah.gibson.mp@parliament.uk
-Tracy,Gilbert,Edinburgh North and Leith,tracy.gilbert.mp@parliament.uk
-Preet,Kaur Gill,Birmingham Edgbaston,preet.gill.mp@parliament.uk
-Rachel,Gilmour,Tiverton and Minehead,rachel.gilmour.mp@parliament.uk
-Becky,Gittins,Clwyd East,becky.gittins.mp@parliament.uk
-John,Glen,Salisbury,john.glen.mp@parliament.uk
-Mary,Glindon,Newcastle upon Tyne East and Wallsend,mary.glindon.mp@parliament.uk
-Olly,Glover,Didcot and Wantage,olly.glover.mp@parliament.uk
-Marie,Goldman,Chelmsford,marie.goldman.mp@parliament.uk
-Ben,Goldsborough,South Norfolk,ben.goldsborough.mp@parliament.uk
-Tom,Gordon,Harrogate and Knaresborough,tom.gordon.mp@parliament.uk
-Jodie,Gosling,Nuneaton,jodie.gosling.mp@parliament.uk
-Georgia,Gould,Queen's Park and Maida Vale,georgia.gould.mp@parliament.uk
-John,Grady,Glasgow East,john.grady.mp@parliament.uk
-Helen,Grant,Maidstone and Malling,helen.grant.mp@parliament.uk
-Sarah,Green,Chesham and Amersham,sarah.green.mp@parliament.uk
-Lilian,Greenwood,Nottingham South,lilian.greenwood.mp@parliament.uk
-Andrew,Griffith,Arundel and South Downs,andrew.griffith.mp@parliament.uk
-Nia,Griffith,Llanelli,nia.griffith.mp@parliament.uk
-Alison,Griffiths,Bognor Regis and Littlehampton,alison.griffiths.mp@parliament.uk
-Andrew,Gwynne,Gorton and Denton,gwynnea@parliament.uk
-Amanda,Hack,North West Leicestershire,amanda.hack.mp@parliament.uk
-Louise,Haigh,Sheffield Heeley,louise.haigh.mp@parliament.uk
-Sarah,Hall,Warrington South,sarah.hall.mp@parliament.uk
-Fabian,Hamilton,Leeds North East,fabian.hamilton.mp@parliament.uk
-Paulette,Hamilton,Birmingham Erdington,paulette.hamilton.mp@parliament.uk
-Claire,Hanna,Belfast South and Mid Down,claire.hanna.mp@parliament.uk
-Monica,Harding,Esher and Walton,monica.harding.mp@parliament.uk
-Emma,Hardy,Kingston upon Hull West and Haltemprice,emma.hardy.mp@parliament.uk
-Carolyn,Harris,Neath and Swansea East,carolyn.harris.mp@parliament.uk
-Rebecca,Harris,Castle Point,rebecca.harris.mp@parliament.uk
-Lloyd,Hatton,South Dorset,lloyd.hatton.mp@parliament.uk
-Helen,Hayes,Dulwich and West Norwood,helen.hayes.mp@parliament.uk
-John,Hayes,South Holland and The Deepings,hayesj@parliament.uk
-Tom,Hayes,Bournemouth East,tom.hayes.mp@parliament.uk
-Claire,Hazelgrove,Filton and Bradley Stoke,claire.hazelgrove.mp@parliament.uk
-Chris,Hazzard,South Down,chris.hazzard.mp@parliament.uk
-John,Healey,Rawmarsh and Conisbrough,john.healey.mp@parliament.uk
-Mark,Hendrick,Preston,mark.hendrick.mp@parliament.uk
-Pippa,Heylings,South Cambridgeshire,pippa.heylings.mp@parliament.uk
-Meg,Hillier,Hackney South and Shoreditch,meghilliermp@parliament.uk
-Chris,Hinchliff,North East Hertfordshire,chris.hinchliff.mp@parliament.uk
-Jonathan,Hinder,Pendle and Clitheroe,jonathan.hinder.mp@parliament.uk
-Damian,Hinds,East Hampshire,damian.hinds.mp@parliament.uk
-Simon,Hoare,North Dorset,simon.hoare.mp@parliament.uk
-Wera,Hobhouse,Bath,wera.hobhouse.mp@parliament.uk
-Sharon,Hodgson,Washington and Gateshead South,sharon.hodgson.mp@parliament.uk
-Richard,Holden,Basildon and Billericay,richard.holden.mp@parliament.uk
-Kevin,Hollinrake,Thirsk and Malton,kevin.hollinrake.mp@parliament.uk
-Paul,Holmes,Hamble Valley,paul.holmes.mp@parliament.uk
-Rachel,Hopkins,Luton South and South Bedfordshire,rachel.hopkins.mp@parliament.uk
-Lindsay,Hoyle,Chorley,
-Nigel,Huddleston,Droitwich and Evesham,nigel.huddleston.mp@parliament.uk
-Neil,Hudson,Epping Forest,neil.hudson.mp@parliament.uk
-Claire,Hughes,Bangor Aberconwy,claire.hughes.mp@parliament.uk
-Dáire,Hughes,Newry and Armagh,daire.hughes.mp@parliament.uk
-Alison,Hume,Scarborough and Whitby,alison.hume.mp@parliament.uk
-Jeremy,Hunt,Godalming and Ash,huntj@parliament.uk
-Rupa,Huq,Ealing Central and Acton,rupa.huq.mp@parliament.uk
-Patrick,Hurley,Southport,patrick.hurley.mp@parliament.uk
-Adnan,Hussain,Blackburn,adnan.hussain.mp@parliament.uk
-Imran,Hussain,Bradford East,imran.hussain.mp@parliament.uk
-Leigh,Ingham,Stafford,leigh.ingham.mp@parliament.uk
-Natasha,Irons,Croydon East,natasha.irons.mp@parliament.uk
-Sally,Jameson,Doncaster Central,sally.jameson.mp@parliament.uk
-Christine,Jardine,Edinburgh West,christine.jardine.mp@parliament.uk
-Dan,Jarvis,Barnsley North,dan.jarvis.mp@parliament.uk
-Liz,Jarvis,Eastleigh,liz.jarvis.mp@parliament.uk
-Bernard,Jenkin,Harwich and North Essex,bernard.jenkin.mp@parliament.uk
-Robert,Jenrick,Newark,robert.jenrick.mp@parliament.uk
-Terry,Jermy,South West Norfolk,terry.jermy.mp@parliament.uk
-Adam,Jogee,Newcastle-under-Lyme,adam.jogee.mp@parliament.uk
-Caroline,Johnson,Sleaford and North Hykeham,caroline.johnson.mp@parliament.uk
-Diana,Johnson,Kingston upon Hull North and Cottingham,johnsond@parliament.uk
-Kim,Johnson,Liverpool Riverside,kim.johnson.mp@parliament.uk
-Clive,Jones,Wokingham,clive.jones.mp@parliament.uk
-Darren,Jones,Bristol North West,darren.jones.mp@parliament.uk
-Gerald,Jones,Merthyr Tydfil and Aberdare,gerald.jones.mp@parliament.uk
-Lillian,Jones,Kilmarnock and Loudoun,lillian.jones.mp@parliament.uk
-Louise,Jones,North East Derbyshire,louise.jones.mp@parliament.uk
-Ruth,Jones,Newport West and Islwyn,ruth.jones.mp@parliament.uk
-Sarah,Jones,Croydon West,sarah.jones.mp@parliament.uk
-Lincoln,Jopp,Spelthorne,lincoln.jopp.mp@parliament.uk
-Gurinder,Singh Josan,Smethwick,gurinder.josan.mp@parliament.uk
-Sojan,Joseph,Ashford,sojan.joseph.mp@parliament.uk
-Warinder,Juss,Wolverhampton West,warinder.juss.mp@parliament.uk
-Chris,Kane,Stirling and Strathallan,chris.kane.mp@parliament.uk
-Mike,Kane,Wythenshawe and Sale East,mike.kane.mp@parliament.uk
-Satvir,Kaur,Southampton Test,satvir.kaur.mp@parliament.uk
-Alicia,Kearns,Rutland and Stamford,alicia.kearns.mp@parliament.uk
-Liz,Kendall,Leicester West,liz.kendall.mp@parliament.uk
-Afzal,Khan,Manchester Rusholme,afzal.khan.mp@parliament.uk
-Ayoub,Khan,Birmingham Perry Barr,ayoub.khan.mp@parliament.uk
-Naushabah,Khan,Gillingham and Rainham,naushabah.khan.mp@parliament.uk
-Stephen,Kinnock,Aberafan Maesteg,stephen.kinnock.mp@parliament.uk
-Jayne,Kirkham,Truro and Falmouth,jayne.kirkham.mp@parliament.uk
-Gen,Kitchen,Wellingborough and Rushden,gen.kitchen.mp@parliament.uk
-Paul,Kohler,Wimbledon,paul.kohler.mp@parliament.uk
-Danny,Kruger,East Wiltshire,
-Sonia,Kumar,Dudley,sonia.kumar.mp@parliament.uk
-Uma,Kumaran,Stratford and Bow,uma.kumaran.mp@parliament.uk
-Peter,Kyle,Hove and Portslade,peter.kyle.mp@parliament.uk
-Laura,Kyrke-Smith,Aylesbury,laura.kyrkesmith.mp@parliament.uk
-Ben,Lake,Ceredigion Preseli,ben.lake.mp@parliament.uk
-Katie,Lam,Weald of Kent,katie.lam.mp@parliament.uk
-Peter,Lamb,Crawley,peter.lamb.mp@parliament.uk
-David,Lammy,Tottenham,david.lammy.mp@parliament.uk
-John,Lamont,"Berwickshire, Roxburgh and Selkirk",john.lamont.mp@parliament.uk
-Ian,Lavery,Blyth and Ashington,ian.lavery.mp@parliament.uk
-Chris,Law,Dundee Central,chris.law.mp@parliament.uk
-Noah,Law,St Austell and Newquay,noah.law.mp@parliament.uk
-Kim,Leadbeater,Spen Valley,kim.leadbeater.mp@parliament.uk
-Graham,Leadbitter,"Moray West, Nairn and Strathspey",graham.leadbitter.mp@parliament.uk
-Edward,Leigh,Gainsborough,edward.leigh.mp@parliament.uk
-Brian,Leishman,Alloa and Grangemouth,brian.leishman.mp@parliament.uk
-Emma,Lewell-Buck,South Shields,emma.lewell-buck.mp@parliament.uk
-Andrew,Lewin,Welwyn Hatfield,andrew.lewin.mp@parliament.uk
-Clive,Lewis,Norwich South,clive.lewis.mp@parliament.uk
-Julian,Lewis,New Forest East,
-Simon,Lightwood,Wakefield and Rothwell,simon.lightwood.mp@parliament.uk
-Carla,Lockhart,Upper Bann,carla.lockhart.mp@parliament.uk
-Seamus,Logan,Aberdeenshire North and Moray East,seamus.logan.mp@parliament.uk
-Rebecca,Long Bailey,Salford,rebecca.longbailey.mp@parliament.uk
-Julia,Lopez,Hornchurch and Upminster,julia.lopez.mp@parliament.uk
-Rupert,Lowe,Great Yarmouth,rupert.lowe.mp@parliament.uk
-Josh,MacAlister,Whitehaven and Workington,josh.macalister.mp@parliament.uk
-Douglas,McAllister,West Dunbartonshire,douglas.mcallister.mp@parliament.uk
-Kerry,McCarthy,Bristol East,kerry.mccarthy.mp@parliament.uk
-James,MacCleary,Lewes,james.maccleary.mp@parliament.uk
-Martin,McCluskey,Inverclyde and Renfrewshire West,martin.mccluskey.mp@parliament.uk
-Siobhain,McDonagh,Mitcham and Morden,mcdonaghs@parliament.uk
-Andy,McDonald,Middlesbrough and Thornaby East,andy.mcdonald.2nd@parliament.uk
-Chris,McDonald,Stockton North,chris.mcdonald.mp@parliament.uk
-Alice,Macdonald,Norwich North,alice.macdonald.mp@parliament.uk
-Angus,MacDonald,"Inverness, Skye and West Ross-shire",angus.macdonald.mp@parliament.uk
-John,McDonnell,Hayes and Harlington,mcdonnellj@parliament.uk
-Blair,McDougall,East Renfrewshire,blair.mcdougall.mp@parliament.uk
-Lola,McEvoy,Darlington,lola.mcevoy.mp@parliament.uk
-Pat,McFadden,Wolverhampton South East,mcfaddenp@parliament.uk
-Alison,McGovern,Birkenhead,alison.mcgovern.mp@parliament.uk
-Alex,McIntyre,Gloucester,alex.mcintyre.mp@parliament.uk
-Gordon,McKee,Glasgow South,gordon.mckee.mp@parliament.uk
-Kevin,McKenna,Sittingbourne and Sheppey,kevin.mckenna.mp@parliament.uk
-Catherine,McKinnell,Newcastle upon Tyne North,catherine.mckinnell.mp@parliament.uk
-Jim,McMahon,"Oldham West, Chadderton and Royton",jim.mcmahon.mp@parliament.uk
-Anna,McMorrin,Cardiff North,anna.mcmorrin.mp@parliament.uk
-James,McMurdock,South Basildon and East Thurrock,james.mcmurdock.mp@parliament.uk
-Andy,MacNae,Rossendale and Darwen,andy.macnae.mp@parliament.uk
-Frank,McNally,Coatbridge and Bellshill,frank.mcnally.mp@parliament.uk
-Kirsty,McNeill,Midlothian,kirsty.mcneill.mp@parliament.uk
-Esther,McVey,Tatton,esther.mcvey.mp@parliament.uk
-Justin,Madders,Ellesmere Port and Bromborough,justin.madders.mp@parliament.uk
-Ben,Maguire,North Cornwall,ben.maguire.mp@parliament.uk
-Helen,Maguire,Epsom and Ewell,helen.maguire.mp@parliament.uk
-Shabana,Mahmood,Birmingham Ladywood,shabana.mahmood.mp@parliament.uk
-Alan,Mak,Havant,alan.mak.mp@parliament.uk
-Seema,Malhotra,Feltham and Heston,seema.malhotra.mp@parliament.uk
-Cathal,Mallaghan,Mid Ulster,cathal.mallaghan.mp@parliament.uk
-Kit,Malthouse,North West Hampshire,kit.malthouse.mp@parliament.uk
-Amanda,Martin,Portsmouth North,amanda.martin.mp@parliament.uk
-Mike,Martin,Tunbridge Wells,mike.martin.mp@parliament.uk
-Rachael,Maskell,York Central,rachael.maskell.mp@parliament.uk
-Paul,Maskey,Belfast West,paul.maskey.mp@parliament.uk
-Keir,Mather,Selby,keir.mather.mp@parliament.uk
-Brian,Mathew,Melksham and Devizes,brian.mathew.mp@parliament.uk
-Alex,Mayer,Dunstable and Leighton Buzzard,alex.mayer.mp@parliament.uk
-Jerome,Mayhew,Broadland and Fakenham,jerome.mayhew.mp@parliament.uk
-Charlie,Maynard,Witney,charlie.maynard.mp@parliament.uk
-Llinos,Medi,Ynys Môn,llinos.medi.mp@parliament.uk
-Anneliese,Midgley,Knowsley,anneliese.midgley.mp@parliament.uk
-Ed,Miliband,Doncaster North,ed.miliband.mp@parliament.uk
-Calum,Miller,Bicester and Woodstock,calum.miller.mp@parliament.uk
-John,Milne,Horsham,john.milne.mp@parliament.uk
-Julie,Minns,Carlisle,julie.minns.mp@parliament.uk
-Navendu,Mishra,Stockport,navendu.mishra.mp@parliament.uk
-Andrew,Mitchell,Sutton Coldfield,andrew.mitchell.mp@parliament.uk
-Abtisam,Mohamed,Sheffield Central,abtisam.mohamed.mp@parliament.uk
-Iqbal,Mohamed,Dewsbury and Batley,iqbal.mohamed.mp@parliament.uk
-Gagan,Mohindra,South West Hertfordshire,gagan.mohindra.mp@parliament.uk
-Perran,Moon,Camborne and Redruth,perran.moon.mp@parliament.uk
-Robbie,Moore,Keighley and Ilkley,robbie.moore.mp@parliament.uk
-Layla,Moran,Oxford West and Abingdon,layla.moran.mp@parliament.uk
-Jessica,Morden,Newport East,mordenj@parliament.uk
-Edward,Morello,West Dorset,edward.morello.mp@parliament.uk
-Helen,Morgan,North Shropshire,helen.morgan.mp@parliament.uk
-Stephen,Morgan,Portsmouth South,stephen.morgan.mp@parliament.uk
-Grahame,Morris,Easington,grahame.morris.mp@parliament.uk
-Joe,Morris,Hexham,joe.morris.mp@parliament.uk
-Tom,Morrison,Cheadle,tom.morrison.mp@parliament.uk
-Joy,Morrissey,Beaconsfield,joy.morrissey.mp@parliament.uk
-Wendy,Morton,Aldridge-Brownhills,wendy.morton.mp@parliament.uk
-Kieran,Mullan,Bexhill and Battle,kieran.mullan.mp@parliament.uk
-Margaret,Mullane,Dagenham and Rainham,margaret.mullane.mp@parliament.uk
-David,Mundell,"Dumfriesshire, Clydesdale and Tweeddale",david.mundell.mp@parliament.uk
-Tessa,Munt,Wells and Mendip Hills,tessa.munt.mp@parliament.uk
-Luke,Murphy,Basingstoke,luke.murphy.mp@parliament.uk
-Chris,Murray,Edinburgh East and Musselburgh,chris.murray.mp@parliament.uk
-Ian,Murray,Edinburgh South,ian.murray.mp@parliament.uk
-James,Murray,Ealing North,james.murray.mp@parliament.uk
-Katrina,Murray,Cumbernauld and Kirkintilloch,katrina.murray.mp@parliament.uk
-Susan,Murray,Mid Dunbartonshire,susan.murray.mp@parliament.uk
-Andrew,Murrison,South West Wiltshire,murrisona@parliament.uk
-Luke,Myer,Middlesbrough South and East Cleveland,luke.myer.mp@parliament.uk
-James,Naish,Rushcliffe,james.naish.mp@parliament.uk
-Connor,Naismith,Crewe and Nantwich,connor.naismith.mp@parliament.uk
-Lisa,Nandy,Wigan,lisa.nandy.mp@parliament.uk
-Kanishka,Narayan,Vale of Glamorgan,kanishka.narayan.mp@parliament.uk
-Pamela,Nash,"Motherwell, Wishaw and Carluke",pamela.nash.mp@parliament.uk
-Josh,Newbury,Cannock Chase,josh.newbury.mp@parliament.uk
-Samantha,Niblett,South Derbyshire,samantha.niblett.mp@parliament.uk
-Charlotte,Nichols,Warrington North,charlotte.nichols.mp@parliament.uk
-Caroline,Nokes,Romsey and Southampton North,caroline.nokes.mp@parliament.uk
-Jesse,Norman,Hereford and South Herefordshire,jesse.norman.mp@parliament.uk
-Alex,Norris,Nottingham North and Kimberley,alex.norris.mp@parliament.uk
-Dan,Norris,North East Somerset and Hanham,dan.norris.mp@parliament.uk
-Ben,Obese-Jecty,Huntingdon,ben.obesejecty.mp@parliament.uk
-Neil,O'Brien,"Harborough, Oadby and Wigston",neil.obrien.mp@parliament.uk
-Brendan,O'Hara,"Argyll, Bute and South Lochaber",brendan.ohara.mp@parliament.uk
-Sarah,Olney,Richmond Park,sarah.olney.mp@parliament.uk
-Melanie,Onn,Great Grimsby and Cleethorpes,melanie.onn.mp@parliament.uk
-Chi,Onwurah,Newcastle upon Tyne Central and West,chi.onwurah.mp@parliament.uk
-Simon,Opher,Stroud,simon.opher.mp@parliament.uk
-Abena,Oppong-Asare,Erith and Thamesmead,
-Kate,Osamor,Edmonton and Winchmore Hill,kate.osamor.mp@parliament.uk
-Kate,Osborne,Jarrow and Gateshead East,kate.osborne.mp@parliament.uk
-Tristan,Osborne,Chatham and Aylesford,tristan.osborne.mp@parliament.uk
-Taiwo,Owatemi,Coventry North West,taiwo.owatemi.mp@parliament.uk
-Sarah,Owen,Luton North,sarah.owen.mp@parliament.uk
-Darren,Paffey,Southampton Itchen,darren.paffey.mp@parliament.uk
-Andrew,Pakes,Peterborough,andrew.pakes.mp@parliament.uk
-Priti,Patel,Witham,withammp@parliament.uk
-Matthew,Patrick,Wirral West,matthew.patrick.mp@parliament.uk
-Rebecca,Paul,Reigate,rebecca.paul.mp@parliament.uk
-Michael,Payne,Gedling,michael.payne.mp@parliament.uk
-Stephanie,Peacock,Barnsley South,stephanie.peacock.mp@parliament.uk
-Jon,Pearce,High Peak,jon.pearce.mp@parliament.uk
-Matthew,Pennycook,Greenwich and Woolwich,matthew.pennycook.mp@parliament.uk
-Toby,Perkins,Chesterfield,toby.perkins.mp@parliament.uk
-Manuela,Perteghella,Stratford-on-Avon,manuela.perteghella.mp@parliament.uk
-Jess,Phillips,Birmingham Yardley,jess.phillips.mp@parliament.uk
-Bridget,Phillipson,Houghton and Sunderland South,bridget.phillipson.mp@parliament.uk
-Chris,Philp,Croydon South,chris.philp.mp@parliament.uk
-Al,Pinkerton,Surrey Heath,al.pinkerton.mp@parliament.uk
-David,Pinto-Duschinsky,Hendon,david.pintoduschinsky.mp@parliament.uk
-Lee,Pitcher,Doncaster East and the Isle of Axholme,lee.pitcher.mp@parliament.uk
-Jo,Platt,Leigh and Atherton,jo.platt.mp@parliament.uk
-Luke,Pollard,Plymouth Sutton and Devonport,luke.pollard.mp@parliament.uk
-Joe,Powell,Kensington and Bayswater,joe.powell.mp@parliament.uk
-Lucy,Powell,Manchester Central,contact@lucypowell.org.uk
-Gregor,Poynton,Livingston,gregor.poynton.mp@parliament.uk
-Peter,Prinsley,Bury St Edmunds and Stowmarket,peter.prinsley.mp@parliament.uk
-Mark,Pritchard,The Wrekin,mark.pritchard.mp@parliament.uk
-Richard,Quigley,Isle of Wight West,richard.quigley.mp@parliament.uk
-Yasmin,Qureshi,Bolton South and Walkden,yasmin.qureshi.mp@parliament.uk
-Steve,Race,Exeter,steve.race.mp@parliament.uk
-Shivani,Raja,Leicester East,shivani.raja.mp@parliament.uk
-Adrian,Ramsay,Waveney Valley,adrian.ramsay.mp@parliament.uk
-Connor,Rand,Altrincham and Sale West,connor.rand.mp@parliament.uk
-Andrew,Ranger,Wrexham,andrew.ranger.mp@parliament.uk
-Jack,Rankin,Windsor,jack.rankin.mp@parliament.uk
-Angela,Rayner,Ashton-under-Lyne,angela.rayner.mp@parliament.uk
-Mike,Reader,Northampton South,mike.reader.mp@parliament.uk
-David,Reed,Exmouth and Exeter East,david.reed.mp@parliament.uk
-Steve,Reed,Streatham and Croydon North,steve.reed.mp@parliament.uk
-Ellie,Reeves,Lewisham West and East Dulwich,ellie.reeves.mp@parliament.uk
-Rachel,Reeves,Leeds West and Pudsey,rachel.reeves.mp@parliament.uk
-Joani,Reid,East Kilbride and Strathaven,joani.reid.mp@parliament.uk
-Emma,Reynolds,Wycombe,emma.reynolds.mp@parliament.uk
-Jonathan,Reynolds,Stalybridge and Hyde,jonathan.reynolds.mp@parliament.uk
-Joshua,Reynolds,Maidenhead,joshua.reynolds.mp@parliament.uk
-Martin,Rhodes,Glasgow North,martin.rhodes.mp@parliament.uk
-Bell,Ribeiro-Addy,Clapham and Brixton Hill,bell.ribeiroaddy.mp@parliament.uk
-Jake,Richards,Rother Valley,jake.richards.mp@parliament.uk
-Jenny,Riddell-Carpenter,Suffolk Coastal,jenny.riddellcarpenter.mp@parliament.uk
-Lucy,Rigby,Northampton North,lucy.rigby.mp@parliament.uk
-Marie,Rimmer,St Helens South and Whiston,marie.rimmer.mp@parliament.uk
-Dave,Robertson,Lichfield,dave.robertson.mp@parliament.uk
-Joe,Robertson,Isle of Wight East,joe.robertson.mp@parliament.uk
-Gavin,Robinson,Belfast East,gavin.robinson.mp@parliament.uk
-Tim,Roca,Macclesfield,tim.roca.mp@parliament.uk
-Matt,Rodda,Reading Central,matt.rodda.mp@parliament.uk
-Ian,Roome,North Devon,ian.roome.mp@parliament.uk
-Andrew,Rosindell,Romford,andrew.rosindell.mp@parliament.uk
-Sam,Rushworth,Bishop Auckland,sam.rushworth.mp@parliament.uk
-Sarah,Russell,Congleton,sarah.russell.mp@parliament.uk
-Tom,Rutland,East Worthing and Shoreham,tom.rutland.mp@parliament.uk
-Oliver,Ryan,Burnley,oliver.ryan.mp@parliament.uk
-Anna,Sabine,Frome and East Somerset,anna.sabine.mp@parliament.uk
-Sarah,Sackman,Finchley and Golders Green,sarah.sackman.mp@parliament.uk
-Jeevun,Sandher,Loughborough,jeevun.sandher.mp@parliament.uk
-Roz,Savage,South Cotswolds,roz.savage.mp@parliament.uk
-Liz,Saville Roberts,Dwyfor Meirionnydd,liz.savilleroberts.mp@parliament.uk
-Michelle,Scrogham,Barrow and Furness,michelle.scrogham.mp@parliament.uk
-Mark,Sewards,Leeds South West and Morley,mark.sewards.mp@parliament.uk
-Naz,Shah,Bradford West,naz.shah.mp@parliament.uk
-Baggy,Shanker,Derby South,baggy.shanker.mp@parliament.uk
-Michael,Shanks,Rutherglen,michael.shanks.mp@parliament.uk
-Jim,Shannon,Strangford,jim.shannon.mp@parliament.uk
-Neil,Shastri-Hurst,Solihull West and Shirley,neil.shastrihurst.mp@parliament.uk
-Alec,Shelbrooke,Wetherby and Easingwold,alec.shelbrooke.mp@parliament.uk
-Tulip,Siddiq,Hampstead and Highgate,tulip.siddiq.mp@parliament.uk
-David,Simmonds,"Ruislip, Northwood and Pinner",david.simmonds.mp@parliament.uk
-Josh,Simons,Makerfield,josh.simons.mp@parliament.uk
-Vikki,Slade,Mid Dorset and North Poole,vikki.slade.mp@parliament.uk
-Andy,Slaughter,Hammersmith and Chiswick,slaughtera@parliament.uk
-John,Slinger,Rugby,john.slinger.mp@parliament.uk
-Lisa,Smart,Hazel Grove,lisa.smart.mp@parliament.uk
-Cat,Smith,Lancaster and Wyre,cat.smith.mp@parliament.uk
-David,Smith,North Northumberland,david.smith.mp@parliament.uk
-Greg,Smith,Mid Buckinghamshire,greg.smith.mp@parliament.uk
-Jeff,Smith,Manchester Withington,jeff.smith.mp@parliament.uk
-Julian,Smith,Skipton and Ripon,julian.smith.mp@parliament.uk
-Nick,Smith,Blaenau Gwent and Rhymney,nick.smith.mp@parliament.uk
-Rebecca,Smith,South West Devon,rebecca.smith.mp@parliament.uk
-Sarah,Smith,Hyndburn,sarah.smith.mp@parliament.uk
-Karin,Smyth,Bristol South,karin.smyth.mp@parliament.uk
-Gareth,Snell,Stoke-on-Trent Central,gareth.snell.mp@parliament.uk
-Andrew,Snowden,Fylde,andrew.snowden.mp@parliament.uk
-Alex,Sobel,Leeds Central and Headingley,alex.sobel.mp@parliament.uk
-Ian,Sollom,St Neots and Mid Cambridgeshire,ian.sollom.mp@parliament.uk
-Ben,Spencer,Runnymede and Weybridge,ben.spencer.mp@parliament.uk
-Patrick,Spencer,Central Suffolk and North Ipswich,patrick.spencer.mp@parliament.uk
-Gregory,Stafford,Farnham and Bordon,greg.stafford.mp@parliament.uk
-Euan,Stainbank,Falkirk,euan.stainbank.mp@parliament.uk
-Keir,Starmer,Holborn and St Pancras,keir.starmer.mp@parliament.uk
-Blake,Stephenson,Mid Bedfordshire,blake.stephenson.mp@parliament.uk
-Jo,Stevens,Cardiff East,jo.stevens.mp@parliament.uk
-Kenneth,Stevenson,Airdrie and Shotts,kenneth.stevenson.mp@parliament.uk
-Elaine,Stewart,"Ayr, Carrick and Cumnock",elaine.stewart.mp@parliament.uk
-Jamie,Stone,"Caithness, Sutherland and Easter Ross",jamie.stone.mp@parliament.uk
-Will,Stone,Swindon North,will.stone.mp@parliament.uk
-Alistair,Strathern,Hitchin,alistair.strathern.mp@parliament.uk
-Wes,Streeting,Ilford North,wes.streeting.mp@parliament.uk
-Alan,Strickland,Newton Aycliffe and Spennymoor,alan.strickland.mp@parliament.uk
-Mel,Stride,Central Devon,mel.stride.mp@parliament.uk
-Graham,Stringer,Blackley and Middleton South,graham.stringer.mp@parliament.uk
-Graham,Stuart,Beverley and Holderness,grahamstuartmp@parliament.uk
-Kirsteen,Sullivan,Bathgate and Linlithgow,kirsteen.sullivan.mp@parliament.uk
-Lauren,Sullivan,Gravesham,lauren.sullivan.mp@parliament.uk
-Zarah,Sultana,Coventry South,zarah.sultana.mp@parliament.uk
-Rishi,Sunak,Richmond and Northallerton,rishi.sunak.mp@parliament.uk
-Peter,Swallow,Bracknell,peter.swallow.mp@parliament.uk
-Robin,Swann,South Antrim,robin.swann.mp@parliament.uk
-Desmond,Swayne,New Forest West,swayned@parliament.uk
-Mark,Tami,Alyn and Deeside,tamim@parliament.uk
-Mike,Tapp,Dover and Deal,mike.tapp.mp@parliament.uk
-Alison,Taylor,Paisley and Renfrewshire North,alison.taylor.mp@parliament.uk
-David,Taylor,Hemel Hempstead,david.taylor.mp@parliament.uk
-Luke,Taylor,Sutton and Cheam,luke.taylor.mp@parliament.uk
-Rachel,Taylor,North Warwickshire and Bedworth,rachel.taylor.mp@parliament.uk
-Bradley,Thomas,Bromsgrove,bradley.thomas.mp@parliament.uk
-Cameron,Thomas,Tewkesbury,cameron.thomas.mp@parliament.uk
-Fred,Thomas,Plymouth Moor View,fred.thomas.mp@parliament.uk
-Gareth,Thomas,Harrow West,gareth.thomas.mp@parliament.uk
-Nick,Thomas-Symonds,Torfaen,nick.thomassymonds.mp@parliament.uk
-Adam,Thompson,Erewash,adam.thompson.mp@parliament.uk
-Emily,Thornberry,Islington South and Finsbury,thornberrye@parliament.uk
-Richard,Tice,Boston and Skegness,richard.tice.mp@parliament.uk
-Marie,Tidball,Penistone and Stocksbridge,marie.tidball.mp@parliament.uk
-Stephen,Timms,East Ham,timmss@parliament.uk
-Nick,Timothy,West Suffolk,nick.timothy.mp@parliament.uk
-Jessica,Toale,Bournemouth West,jessica.toale.mp@parliament.uk
-Dan,Tomlinson,Chipping Barnet,dan.tomlinson.mp@parliament.uk
-Jon,Trickett,Normanton and Hemsworth,trickettj@parliament.uk
-Laura,Trott,Sevenoaks,laura.trott.mp@parliament.uk
-Henry,Tufnell,Mid and South Pembrokeshire,henry.tufnell.mp@parliament.uk
-Tom,Tugendhat,Tonbridge,tom.tugendhat.mp@parliament.uk
-Anna,Turley,Redcar,anna.turley.mp@parliament.uk
-Matt,Turmaine,Watford,matt.turmaine.mp@parliament.uk
-Karl,Turner,Kingston upon Hull East,karl.turner.mp@parliament.uk
-Laurence,Turner,Birmingham Northfield,laurence.turner.mp@parliament.uk
-Derek,Twigg,Widnes and Halewood,derek.twigg.mp@parliament.uk
-Liz,Twist,Blaydon and Consett,liz.twist.mp@parliament.uk
-Harpreet,Uppal,Huddersfield,harpreet.uppal.mp@parliament.uk
-Freddie,van Mierlo,Henley and Thame,freddie.vanmierlo.mp@parliament.uk
-Tony,Vaughan,Folkestone and Hythe,tony.vaughan.mp@parliament.uk
-Valerie,Vaz,Walsall and Bloxwich,valerie.vaz.mp@parliament.uk
-Martin,Vickers,Brigg and Immingham,martin.vickers.mp@parliament.uk
-Matt,Vickers,Stockton West,matt.vickers.mp@parliament.uk
-Chris,Vince,Harlow,chris.vince.mp@parliament.uk
-Caroline,Voaden,South Devon,caroline.voaden.mp@parliament.uk
-Christian,Wakeford,Bury South,christian.wakeford.mp@parliament.uk
-Imogen,Walker,Hamilton and Clyde Valley,imogen.walker.mp@parliament.uk
-Chris,Ward,Brighton Kemptown and Peacehaven,chris.ward.mp@parliament.uk
-Melanie,Ward,Cowdenbeath and Kirkcaldy,melanie.ward.mp@parliament.uk
-Paul,Waugh,Rochdale,paul.waugh.mp@parliament.uk
-Chris,Webb,Blackpool South,chris.webb.mp@parliament.uk
-Michelle,Welsh,Sherwood Forest,michelle.welsh.mp@parliament.uk
-Catherine,West,Hornsey and Friern Barnet,catherine.west.mp@parliament.uk
-Andrew,Western,Stretford and Urmston,andrew.western.mp@parliament.uk
-Matt,Western,Warwick and Leamington,matt.western.mp@parliament.uk
-Helen,Whately,Faversham and Mid Kent,helen.whately.mp@parliament.uk
-Michael,Wheeler,Worsley and Eccles,michael.wheeler.mp@parliament.uk
-John,Whitby,Derbyshire Dales,john.whitby.mp@parliament.uk
-Jo,White,Bassetlaw,jo.white.mp@parliament.uk
-Katie,White,Leeds North West,katie.white.mp@parliament.uk
-John,Whittingdale,Maldon,john.whittingdale.mp@parliament.uk
-Nadia,Whittome,Nottingham East,nadia.whittome.mp@parliament.uk
-James,Wild,North West Norfolk,james.wild.mp@parliament.uk
-Max,Wilkinson,Cheltenham,max.wilkinson.mp@parliament.uk
-David,Williams,Stoke-on-Trent North,david.williams.mp@parliament.uk
-Gavin,Williamson,"Stone, Great Wyrley and Penkridge",gavin.williamson.mp@parliament.uk
-Munira,Wilson,Twickenham,munira.wilson.mp@parliament.uk
-Sammy,Wilson,East Antrim,barronj@parliament.uk
-Pete,Wishart,Perth and Kinross-shire,pete.wishart.mp@parliament.uk
-Steve,Witherden,Montgomeryshire and Glyndŵr,steve.witherden.mp@parliament.uk
-Mike,Wood,Kingswinford and South Staffordshire,mike.wood.mp@parliament.uk
-Sean,Woodcock,Banbury,sean.woodcock.mp@parliament.uk
-Jeremy,Wright,Kenilworth and Southam,Jeremy.wright.mp@parliament.uk
-Rosie,Wrighting,Kettering,rosie.wrighting.mp@parliament.uk
-Martin,Wrigley,Newton Abbot,martin.wrigley.mp@parliament.uk
-Yuan,Yang,Earley and Woodley,yuan.yang.mp@parliament.uk
-Mohammad,Yasin,Bedford,mohammad.yasin.mp@parliament.uk
-Steve,Yemm,Mansfield,steve.yemm.mp@parliament.uk
-Claire,Young,Thornbury and Yate,claire.young.mp@parliament.uk
-Daniel,Zeichner,Cambridge,daniel@danielzeichner.co.uk
-        `;
+        // Prepopulated letters (placeholders)
+        const letters = {
+            "CBDC Policy": `I am writing to express my concerns about Central Bank Digital Currencies (CBDCs). I believe CBDCs pose significant risks to financial privacy and individual freedoms. The potential for government surveillance through transaction tracking is alarming, and the centralization of financial control could undermine economic resilience. I urge you to oppose the development and implementation of CBDCs in the UK and advocate for policies that protect decentralized financial systems.`,
+            "BTC Policy": `[Placeholder: Insert letter about BTC Policy here]`,
+            "Tax Policy": `[Placeholder: Insert letter about Tax Policy here]`
+        };
+
+        // CSV URL from Google Sheets
+        const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRWw-EUwnZUANlr2AgEgpOAN8ExWAPae5dmLFVGy7g2fzJsHDJXbfZ9SWSQghCSLlZgpOrpSDNhP6Sb/pub?gid=908878639&single=true&output=csv';
+
+        // Validation functions
+        function isValidEmail(email) {
+            return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+        }
+
+        function isValidPostcode(postcode) {
+            return /^[A-Z]{1,2}\d[A-Z\d]? \d[A-Z]{2}$/i.test(postcode);
+        }
+
+        // Blur event listeners for validation
+        const nameInput = document.getElementById('name');
+        const emailInput = document.getElementById('email');
+        const postcodeInput = document.getElementById('postcode');
+        const policyInputs = document.querySelectorAll('input[name="policy"]');
+
+        nameInput.addEventListener('blur', () => {
+            if (!nameInput.value.trim()) {
+                document.getElementById('nameError').classList.remove('hidden');
+            } else {
+                document.getElementById('nameError').classList.add('hidden');
+            }
+        });
+
+        emailInput.addEventListener('blur', () => {
+            const email = emailInput.value.trim();
+            if (!email) {
+                document.getElementById('emailError').textContent = 'Please enter your email address';
+                document.getElementById('emailError').classList.remove('hidden');
+            } else if (!isValidEmail(email)) {
+                document.getElementById('emailError').textContent = 'Please enter a valid email address';
+                document.getElementById('emailError').classList.remove('hidden');
+            } else {
+                document.getElementById('emailError').classList.add('hidden');
+            }
+        });
+
+        postcodeInput.addEventListener('blur', () => {
+            const postcode = postcodeInput.value.trim();
+            if (!postcode) {
+                document.getElementById('postcodeError').textContent = 'Please enter your postcode';
+                document.getElementById('postcodeError').classList.remove('hidden');
+            } else if (!isValidPostcode(postcode)) {
+                document.getElementById('postcodeError').textContent = 'Please enter a valid UK postcode';
+                document.getElementById('postcodeError').classList.remove('hidden');
+            } else {
+                document.getElementById('postcodeError').classList.add('hidden');
+            }
+        });
+
+        // Fetch and parse CSV data
+        let mpDataCache = null;
+
+        async function fetchMpData() {
+            if (mpDataCache) return mpDataCache;
+
+            try {
+                const response = await fetch(csvUrl);
+                if (!response.ok) throw new Error('Failed to fetch CSV');
+                const csvText = await response.text();
+
+                return new Promise((resolve, reject) => {
+                    Papa.parse(csvText, {
+                        header: true,
+                        skipEmptyLines: true,
+                        complete: (result) => {
+                            mpDataCache = result.data;
+                            resolve(result.data);
+                        },
+                        error: (error) => reject(error)
+                    });
+                });
+            } catch (error) {
+                console.error('Error fetching or parsing CSV:', error);
+                throw error;
+            }
+        }
 
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
 
+            // Validate policy selection
+            const selectedPolicy = document.querySelector('input[name="policy"]:checked');
+            if (!selectedPolicy) {
+                document.getElementById('policyError').classList.remove('hidden');
+                return;
+            } else {
+                document.getElementById('policyError').classList.add('hidden');
+            }
+
             const postcode = document.getElementById('postcode').value;
-            const apiKey = 'FncmgQEVdkSUE32UAMFKFsca';
+            const userName = document.getElementById('name').value.trim();
+            const apiKey = 'FncmgQEVdkSUE32UAMFKFsca'; // TODO: Secure this API key
             const apiUrl = `https://www.theyworkforyou.com/api/getMP?postcode=${postcode}&key=${apiKey}`;
 
             try {
                 const response = await fetch(apiUrl);
                 const data = await response.json();
                 const mpName = data.full_name;
+                const mpParty = data.party;
+                const mpConstituency = data.constituency;
+                const mpData = await getMpData(mpConstituency);
 
-                const mpData = await getMpData(mpName);
-                if (mpData) {
-                    mpDetails.textContent = `${mpData.name} (${mpData.party}) - ${mpData.constituency}`;
-                    emailLink.href = `mailto:${mpData.email}?subject=Your%20subject%20here&body=Your%20message%20here`;
-                    mpInfo.classList.remove('hidden');
-                    messagePreview.classList.remove('hidden');
-                    previewText.textContent = 'Your message preview goes here';
+                mpDetails.textContent = `${mpName} (${mpParty}) - ${mpConstituency}`;
+
+                if (mpData && mpData.Email) {
+                    const mpLastName = mpData.Surname;
+                    const policy = selectedPolicy.value;
+                    const letter = letters[policy];
+                    const emailBody = encodeURIComponent(
+                        `Dear ${mpLastName},\n\n${letter}\n\nSincerely,\n${userName}`
+                    );
+                    emailLink.href = `mailto:${mpData.Email}?subject=Concerns%20about%20${encodeURIComponent(policy)}&body=${emailBody}`;
+                    emailLink.textContent = "Click here to email your MP";
                 } else {
-                    mpDetails.textContent = 'MP not found in the CSV data';
-                    mpInfo.classList.remove('hidden');
+                    emailLink.textContent = "Email not available for this MP";
+                    emailLink.removeAttribute('href');
                 }
+
+                mpInfo.classList.remove('hidden');
             } catch (error) {
                 console.error('Error fetching MP data:', error);
                 mpDetails.textContent = 'Error fetching MP data. Please try again.';
@@ -774,16 +224,16 @@ Daniel,Zeichner,Cambridge,daniel@danielzeichner.co.uk
             }
         });
 
-        async function getMpData(mpName) {
-            const rows = csvData.split('\n').slice(1);
-
-            for (const row of rows) {
-                const [forename, surname, constituency, email] = row.split(',');
-                if (`${forename} ${surname}` === mpName) {
+        async function getMpData(constituency) {
+            const mpData = await fetchMpData();
+            const normalizedConstituency = constituency.toLowerCase().trim();
+            for (const row of mpData) {
+                const normalizedCsvConstituency = row.Constituency.toLowerCase().trim();
+                if (normalizedCsvConstituency === normalizedConstituency) {
                     return {
-                        name: `${forename} ${surname}`,
-                        constituency,
-                        email
+                        Forename: row.Forename,
+                        Surname: row.Surname,
+                        Email: row.Email
                     };
                 }
             }
