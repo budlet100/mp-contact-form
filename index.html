@@ -65,20 +65,24 @@
                 </div>
             </div>
 
+            <!-- Find My MP Button -->
+            <button type="submit" id="findMpButton"
+                class="w-full bg-orange-600 text-white py-3 px-4 rounded-md hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 transition-colors disabled:bg-gray-400">
+                Find My MP
+            </button>
+
             <!-- MP Information Display -->
             <div id="mpInfo" class="hidden bg-orange-50 p-4 rounded-lg">
                 <h2 class="text-lg font-semibold mb-2 text-gray-700">Your MP</h2>
                 <p id="mpDetails" class="text-gray-800"></p>
-                <p class="mt-4">
+                <button id="contactMpButton" 
+                    class="mt-4 w-full bg-orange-600 text-white py-3 px-4 rounded-md hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 transition-colors disabled:bg-gray-400 hidden">
+                    Contact My MP
+                </button>
+                <p id="emailLinkContainer" class="mt-4 hidden">
                     <a id="emailLink" href="#" target="_blank" class="text-orange-600 hover:text-orange-700">Click here to email your MP</a>
                 </p>
             </div>
-
-            <!-- Submit Button -->
-            <button type="submit" id="submitButton"
-                class="w-full bg-orange-600 text-white py-3 px-4 rounded-md hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 transition-colors disabled:bg-gray-400">
-                Contact My MP
-            </button>
         </form>
     </div>
 
@@ -87,6 +91,9 @@
         const mpInfo = document.getElementById('mpInfo');
         const mpDetails = document.getElementById('mpDetails');
         const emailLink = document.getElementById('emailLink');
+        const emailLinkContainer = document.getElementById('emailLinkContainer');
+        const findMpButton = document.getElementById('findMpButton');
+        const contactMpButton = document.getElementById('contactMpButton');
 
         // Prepopulated letters (placeholders)
         const letters = {
@@ -105,6 +112,29 @@
 
         function isValidPostcode(postcode) {
             return /^[A-Z]{1,2}\d[A-Z\d]? \d[A-Z]{2}$/i.test(postcode);
+        }
+
+        // Simple heuristic to determine Mr./Ms. based on forename
+        function getTitle(forename) {
+            const commonFemaleNames = [
+                "Diane", "Heidi", "Rushanara", "Rosena", "Fleur", "Victoria", "Catherine", "Olivia",
+                "Harriett", "Antonia", "Jess", "Lorraine", "Apsana", "Alison", "Siân", "Polly", "Olivia",
+                "Rachel", "Elsie", "Sarah", "Jade", "Sureena", "Karen", "Aphra", "Suella", "Jess", "Julia",
+                "Maureen", "Dawn", "Ruth", "Nesil", "Irene", "Juliet", "Charlotte", "Wendy", "Sarah",
+                "Bambos", "Ellie", "Feryal", "Carla", "Samantha", "Anneliese", "Helena", "Maria", "Sorcha",
+                "Cat", "Lauren", "Sarah", "Maya", "Kirith", "Florence", "Kate", "Kate", "Miatta", "Linsey",
+                "Natalie", "Emma", "Catherine", "Vicky", "Mary", "Zöe", "Gill", "Anna", "Sarah", "Lilian",
+                "Nia", "Alison", "Amanda", "Louise", "Sarah", "Paulette", "Claire", "Monica", "Emma",
+                "Carolyn", "Rebecca", "Helen", "Claire", "Pippa", "Meg", "Sharon", "Rachel", "Wera", "Natasha",
+                "Sally", "Christine", "Liz", "Caroline", "Diana", "Kim", "Lillian", "Louise", "Ruth", "Sarah",
+                "Satvir", "Alicia", "Liz", "Naushabah", "Jayne", "Gen", "Sonia", "Uma", "Laura", "Katie",
+                "Abena", "Kate", "Kate", "Taiwo", "Sarah", "Priti", "Rebecca", "Stephanie", "Manuela", "Jess",
+                "Bridget", "Ellie", "Rachel", "Joani", "Emma", "Bell", "Jenny", "Lucy", "Marie", "Anna", "Sarah",
+                "Roz", "Liz", "Michelle", "Naz", "Tulip", "Vikki", "Lisa", "Cat", "Rebecca", "Sarah", "Karin",
+                "Kirsteen", "Lauren", "Zarah", "Jo", "Elaine", "Susan", "Katrina", "Melanie", "Michelle",
+                "Catherine", "Helen", "Jo", "Katie", "Nadia", "Munira", "Claire", "Yuan"
+            ];
+            return commonFemaleNames.includes(forename) ? "Ms." : "Mr.";
         }
 
         // Blur event listeners for validation
@@ -149,6 +179,7 @@
 
         // Fetch and parse CSV data
         let mpDataCache = null;
+        let mpDataResult = null; // Store MP data for use in contact step
 
         async function fetchMpData() {
             if (mpDataCache) return mpDataCache;
@@ -175,6 +206,7 @@
             }
         }
 
+        // Step 1: Find MP
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
 
@@ -188,7 +220,6 @@
             }
 
             const postcode = document.getElementById('postcode').value;
-            const userName = document.getElementById('name').value.trim();
             const apiKey = 'FncmgQEVdkSUE32UAMFKFsca'; // TODO: Secure this API key
             const apiUrl = `https://www.theyworkforyou.com/api/getMP?postcode=${postcode}&key=${apiKey}`;
 
@@ -198,29 +229,45 @@
                 const mpName = data.full_name;
                 const mpParty = data.party;
                 const mpConstituency = data.constituency;
-                const mpData = await getMpData(mpConstituency);
+                mpDataResult = await getMpData(mpConstituency);
 
                 mpDetails.textContent = `${mpName} (${mpParty}) - ${mpConstituency}`;
-
-                if (mpData && mpData.Email) {
-                    const mpLastName = mpData.Surname;
-                    const policy = selectedPolicy.value;
-                    const letter = letters[policy];
-                    const emailBody = encodeURIComponent(
-                        `Dear ${mpLastName},\n\n${letter}\n\nSincerely,\n${userName}`
-                    );
-                    emailLink.href = `mailto:${mpData.Email}?subject=Concerns%20about%20${encodeURIComponent(policy)}&body=${emailBody}`;
-                    emailLink.textContent = "Click here to email your MP";
-                } else {
-                    emailLink.textContent = "Email not available for this MP";
-                    emailLink.removeAttribute('href');
-                }
-
                 mpInfo.classList.remove('hidden');
+                contactMpButton.classList.remove('hidden');
+                emailLinkContainer.classList.add('hidden'); // Hide email link until "Contact My MP" is clicked
             } catch (error) {
                 console.error('Error fetching MP data:', error);
                 mpDetails.textContent = 'Error fetching MP data. Please try again.';
                 mpInfo.classList.remove('hidden');
+                contactMpButton.classList.add('hidden');
+            }
+        });
+
+        // Step 2: Contact MP
+        contactMpButton.addEventListener('click', () => {
+            if (!mpDataResult) {
+                mpDetails.textContent = 'Please find your MP first.';
+                return;
+            }
+
+            const userName = document.getElementById('name').value.trim();
+            const selectedPolicy = document.querySelector('input[name="policy"]:checked').value;
+
+            if (mpDataResult && mpDataResult.Email) {
+                const mpTitle = getTitle(mpDataResult.Forename);
+                const mpLastName = mpDataResult.Surname;
+                const policy = selectedPolicy;
+                const letter = letters[policy];
+                const emailBody = encodeURIComponent(
+                    `Dear ${mpTitle} ${mpLastName},\n\n${letter}\n\nSincerely,\n${userName}`
+                );
+                emailLink.href = `mailto:${mpDataResult.Email}?subject=Concerns%20about%20${encodeURIComponent(policy)}&body=${emailBody}`;
+                emailLink.textContent = "Click here to email your MP";
+                emailLinkContainer.classList.remove('hidden');
+            } else {
+                emailLink.textContent = "Email not available for this MP";
+                emailLink.removeAttribute('href');
+                emailLinkContainer.classList.remove('hidden');
             }
         });
 
