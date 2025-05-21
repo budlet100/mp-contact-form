@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MP Contact Form - Bitcoin Policy</title>
+    <!-- Note: Using cdn.tailwindcss.com for development only. For production, install Tailwind CSS as a dependency: https://tailwindcss.com/docs/installation -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
 </head>
@@ -75,13 +76,11 @@
             <div id="mpInfo" class="hidden bg-orange-50 p-4 rounded-lg">
                 <h2 class="text-lg font-semibold mb-2 text-gray-700">Your MP</h2>
                 <p id="mpDetails" class="text-gray-800"></p>
+                <p id="emailStatus" class="mt-4 text-gray-800 hidden"></p>
                 <button id="contactMpButton" 
                     class="mt-4 w-full bg-orange-600 text-white py-3 px-4 rounded-md hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 transition-colors disabled:bg-gray-400 hidden">
                     Contact My MP
                 </button>
-                <p id="emailLinkContainer" class="mt-4 hidden">
-                    <a id="emailLink" href="#" target="_blank" class="text-orange-600 hover:text-orange-700">Click here to email your MP</a>
-                </p>
             </div>
         </form>
     </div>
@@ -90,8 +89,7 @@
         const form = document.getElementById('mpContactForm');
         const mpInfo = document.getElementById('mpInfo');
         const mpDetails = document.getElementById('mpDetails');
-        const emailLink = document.getElementById('emailLink');
-        const emailLinkContainer = document.getElementById('emailLinkContainer');
+        const emailStatus = document.getElementById('emailStatus');
         const findMpButton = document.getElementById('findMpButton');
         const contactMpButton = document.getElementById('contactMpButton');
 
@@ -234,12 +232,13 @@
                 mpDetails.textContent = `${mpName} (${mpParty}) - ${mpConstituency}`;
                 mpInfo.classList.remove('hidden');
                 contactMpButton.classList.remove('hidden');
-                emailLinkContainer.classList.add('hidden'); // Hide email link until "Contact My MP" is clicked
+                emailStatus.classList.add('hidden');
             } catch (error) {
                 console.error('Error fetching MP data:', error);
                 mpDetails.textContent = 'Error fetching MP data. Please try again.';
                 mpInfo.classList.remove('hidden');
                 contactMpButton.classList.add('hidden');
+                emailStatus.classList.add('hidden');
             }
         });
 
@@ -261,13 +260,13 @@
                 const emailBody = encodeURIComponent(
                     `Dear ${mpTitle} ${mpLastName},\n\n${letter}\n\nSincerely,\n${userName}`
                 );
-                emailLink.href = `mailto:${mpDataResult.Email}?subject=Concerns%20about%20${encodeURIComponent(policy)}&body=${emailBody}`;
-                emailLink.textContent = "Click here to email your MP";
-                emailLinkContainer.classList.remove('hidden');
+                const mailtoLink = `mailto:${mpDataResult.Email}?subject=Concerns%20about%20${encodeURIComponent(policy)}&body=${emailBody}`;
+                window.location.href = mailtoLink; // Directly open the email client
+                emailStatus.textContent = "Opening your email client...";
+                emailStatus.classList.remove('hidden');
             } else {
-                emailLink.textContent = "Email not available for this MP";
-                emailLink.removeAttribute('href');
-                emailLinkContainer.classList.remove('hidden');
+                emailStatus.textContent = "Email not available for this MP";
+                emailStatus.classList.remove('hidden');
             }
         });
 
