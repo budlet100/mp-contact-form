@@ -15,57 +15,58 @@
         }
     </style>
 </head>
-<body class="bg-[#1A1A1A] text-white min-h-screen p-6">
-    <div class="max-w-3xl mx-auto bg-[#222222] p-6 rounded-lg shadow-md">
-        <h1 class="text-3xl font-bold mb-2 text-white tracking-tight">Contact Your MP About Bitcoin Policy</h1>
-        <p class="text-[#B0B0B0] mb-6">Make your voice heard on Bitcoin policy issues.</p>
+<body class="bg-gray-400 text-black min-h-screen p-6">
+    <div class="max-w-3xl mx-auto bg-white p-6 rounded-lg shadow-md">
+        <img src="bpukimg.jpg" alt="BPUK Logo" class="mx-auto mb-4" style="width: 100px; height: 100px;">
+        <h1 class="text-3xl font-bold mb-2 text-orange-700 text-center tracking-tight">Contact Your MP About Bitcoin Policy</h1>
+        <p class="text-black mb-6 text-center">Make your voice heard on Bitcoin policy issues.</p>
 
         <form id="mpContactForm" class="space-y-6">
             <!-- Personal Information Section -->
-            <div class="bg-[#222222] p-4 rounded-lg">
-                <h2 class="text-xl font-semibold mb-4 text-white">Your Information</h2>
+            <div class="p-4 rounded-lg">
+                <h2 class="text-xl font-semibold mb-4 text-orange-700">Your Information</h2>
                 <div class="space-y-4">
                     <div>
-                        <label for="name" class="block text-sm font-medium text-white">Full Name *</label>
+                        <label for="name" class="block text-sm font-medium text-black">Full Name *</label>
                         <input type="text" id="name" name="name" required
-                            class="mt-1 block w-full rounded-md bg-[#333333] text-white border-gray-600 shadow-sm focus:border-[#F5A623] focus:ring-[#F5A623] px-3 py-2 placeholder-[#B0B0B0]"
+                            class="mt-1 block w-full rounded-md bg-gray-100 text-black border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 px-3 py-2"
                             placeholder="Your full name">
                         <p id="nameError" class="hidden text-[#EF4444] text-sm mt-1">Please enter your full name</p>
                     </div>
 
                     <div>
-                        <label for="email" class="block text-sm font-medium text-white">Email Address *</label>
+                        <label for="email" class="block text-sm font-medium text-black">Email Address *</label>
                         <input type="email" id="email" name="email" required
-                            class="mt-1 block w-full rounded-md bg-[#333333] text-white border-gray-600 shadow-sm focus:border-[#F5A623] focus:ring-[#F5A623] px-3 py-2 placeholder-[#B0B0B0]"
+                            class="mt-1 block w-full rounded-md bg-gray-100 text-black border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 px-3 py-2"
                             placeholder="your.email@example.com">
                         <p id="emailError" class="hidden text-[#EF4444] text-sm mt-1">Please enter a valid email address</p>
                     </div>
 
                     <div>
-                        <label for="postcode" class="block text-sm font-medium text-white">Postcode *</label>
+                        <label for="postcode" class="block text-sm font-medium text-black">Postcode *</label>
                         <input type="text" id="postcode" name="postcode" required
-                            class="mt-1 block w-full rounded-md bg-[#333333] text-white border-gray-600 shadow-sm focus:border-[#F5A623] focus:ring-[#F5A623] px-3 py-2 placeholder-[#B0B0B0]"
+                            class="mt-1 block w-full rounded-md bg-gray-100 text-black border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 px-3 py-2"
                             placeholder="e.g., SW1A 1AA">
                         <p id="postcodeError" class="hidden text-[#EF4444] text-sm mt-1">Please enter a valid UK postcode</p>
                     </div>
 
                     <div>
-                        <h3 class="text-sm font-medium text-white">Select a policy issue to contact your MP about:</h3>
+                        <h3 class="text-sm font-medium text-black">Select a policy issue to contact your MP about:</h3>
                         <div class="mt-2 space-y-2">
                             <div class="flex items-center">
                                 <input id="cbdcPolicy" name="policy" type="radio" value="CBDC Policy" required
-                                    class="h-4 w-4 text-[#F5A623] focus:ring-[#F5A623] border-gray-600 bg-[#333333]">
-                                <label for="cbdcPolicy" class="ml-2 block text-sm text-white">CBDC Policy</label>
+                                    class="h-4 w-4 text-orange-600 focus:ring-orange-500 border-gray-300">
+                                <label for="cbdcPolicy" class="ml-2 block text-sm text-black">CBDC Policy</label>
                             </div>
                             <div class="flex items-center">
                                 <input id="btcPolicy" name="policy" type="radio" value="BTC Policy"
-                                    class="h-4 w-4 text-[#F5A623] focus:ring-[#F5A623] border-gray-600 bg-[#333333]">
-                                <label for="btcPolicy" class="ml-2 block text-sm text-white">BTC Policy</label>
+                                    class="h-4 w-4 text-orange-600 focus:ring-orange-500 border-gray-300">
+                                <label for="btcPolicy" class="ml-2 block text-sm text-black">BTC Policy</label>
                             </div>
                             <div class="flex items-center">
                                 <input id="taxPolicy" name="policy" type="radio" value="Tax Policy"
-                                    class="h-4 w-4 text-[#F5A623] focus:ring-[#F5A623] border-gray-600 bg-[#333333]">
-                                <label for="taxPolicy" class="ml-2 block text-sm text-white">Tax Policy</label>
+                                    class="h-4 w-4 text-orange-600 focus:ring-orange-500 border-gray-300">
+                                <label for="taxPolicy" class="ml-2 block text-sm text-black">Tax Policy</label>
                             </div>
                         </div>
                         <p id="policyError" class="hidden text-[#EF4444] text-sm mt-1">Please select a policy issue</p>
@@ -75,17 +76,17 @@
 
             <!-- Find My MP Button -->
             <button type="submit" id="findMpButton"
-                class="w-full bg-[#F5A623] text-white py-3 px-4 rounded-md hover:bg-[#D68A1A] focus:outline-none focus:ring-2 focus:ring-[#F5A623] focus:ring-offset-2 transition-colors disabled:bg-gray-400">
+                class="w-full bg-gradient-to-r from-orange-700 to-orange-300 text-white py-3 px-4 rounded-md hover:brightness-105 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 transition-colors disabled:bg-gray-400">
                 Find My MP
             </button>
 
             <!-- MP Information Display -->
-            <div id="mpInfo" class="hidden bg-[#222222] p-4 rounded-lg">
-                <h2 class="text-xl font-semibold mb-2 text-white">Your MP</h2>
-                <p id="mpDetails" class="text-white"></p>
-                <p id="emailStatus" class="mt-4 text-[#B0B0B0] hidden"></p>
+            <div id="mpInfo" class="hidden p-4 rounded-lg">
+                <h2 class="text-xl font-semibold mb-2 text-orange-700">Your MP</h2>
+                <p id="mpDetails" class="text-black"></p>
+                <p id="emailStatus" class="mt-4 text-gray-600 hidden"></p>
                 <button id="contactMpButton" 
-                    class="mt-4 w-full bg-[#F5A623] text-white py-3 px-4 rounded-md hover:bg-[#D68A1A] focus:outline-none focus:ring-2 focus:ring-[#F5A623] focus:ring-offset-2 transition-colors disabled:bg-gray-400 hidden">
+                    class="mt-4 w-full bg-gradient-to-r from-orange-700 to-orange-300 text-white py-3 px-4 rounded-md hover:brightness-105 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 transition-colors disabled:bg-gray-400 hidden">
                     Contact My MP
                 </button>
             </div>
