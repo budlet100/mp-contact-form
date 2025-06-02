@@ -12,24 +12,43 @@
     <style>
         body {
             font-family: 'Inter', sans-serif;
+            background: linear-gradient(to bottom, #4B5563, #6B7280);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 1.5rem;
+        }
+        .gradient-text {
+            background: linear-gradient(to right, #C05621, #F6AD55);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .gradient-button {
+            background: linear-gradient(to right, #C05621, #F6AD55);
+            color: white;
+        }
+        .gradient-button:hover {
+            background: linear-gradient(to right, #9C4221, #D97706);
         }
     </style>
 </head>
-<body class="bg-gray-400 text-black min-h-screen p-6">
+<body>
     <div class="max-w-3xl mx-auto bg-white p-6 rounded-lg shadow-md">
-        <img src="bpukimg.jpg" alt="BPUK Logo" class="mx-auto mb-4" style="width: 100px; height: 100px;">
-        <h1 class="text-3xl font-bold mb-2 text-orange-700 text-center tracking-tight">Contact Your MP About Bitcoin Policy</h1>
-        <p class="text-black mb-6 text-center">Make your voice heard on Bitcoin policy issues.</p>
+        <img src="bpukimg.jpg" alt="BPUK Logo" class="w-32 h-32 object-contain mx-auto mb-4">
+        <h1 class="text-3xl font-bold mb-2 text-center gradient-text tracking-tight">Contact Your MP About Bitcoin Policy</h1>
+        <p class="text-black mb-6">Make your voice heard on Bitcoin policy issues.</p>
 
         <form id="mpContactForm" class="space-y-6">
             <!-- Personal Information Section -->
-            <div class="p-4 rounded-lg">
-                <h2 class="text-xl font-semibold mb-4 text-orange-700">Your Information</h2>
+            <div class="bg-white p-4 rounded-lg">
+                <h2 class="text-xl font-semibold mb-4 gradient-text">Your Information</h2>
                 <div class="space-y-4">
                     <div>
                         <label for="name" class="block text-sm font-medium text-black">Full Name *</label>
                         <input type="text" id="name" name="name" required
-                            class="mt-1 block w-full rounded-md bg-gray-100 text-black border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 px-3 py-2"
+                            class="mt-1 block w-full rounded-md bg-white text-black border-gray-600 shadow-sm focus:border-[#F5A623] focus:ring-[#F5A623] px-3 py-2 placeholder-gray-400"
                             placeholder="Your full name">
                         <p id="nameError" class="hidden text-[#EF4444] text-sm mt-1">Please enter your full name</p>
                     </div>
@@ -37,7 +56,7 @@
                     <div>
                         <label for="email" class="block text-sm font-medium text-black">Email Address *</label>
                         <input type="email" id="email" name="email" required
-                            class="mt-1 block w-full rounded-md bg-gray-100 text-black border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 px-3 py-2"
+                            class="mt-1 block w-full rounded-md bg-white text-black border-gray-600 shadow-sm focus:border-[#F5A623] focus:ring-[#F5A623] px-3 py-2 placeholder-gray-400"
                             placeholder="your.email@example.com">
                         <p id="emailError" class="hidden text-[#EF4444] text-sm mt-1">Please enter a valid email address</p>
                     </div>
@@ -45,7 +64,7 @@
                     <div>
                         <label for="postcode" class="block text-sm font-medium text-black">Postcode *</label>
                         <input type="text" id="postcode" name="postcode" required
-                            class="mt-1 block w-full rounded-md bg-gray-100 text-black border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 px-3 py-2"
+                            class="mt-1 block w-full rounded-md bg-white text-black border-gray-600 shadow-sm focus:border-[#F5A623] focus:ring-[#F5A623] px-3 py-2 placeholder-gray-400"
                             placeholder="e.g., SW1A 1AA">
                         <p id="postcodeError" class="hidden text-[#EF4444] text-sm mt-1">Please enter a valid UK postcode</p>
                     </div>
@@ -55,17 +74,17 @@
                         <div class="mt-2 space-y-2">
                             <div class="flex items-center">
                                 <input id="cbdcPolicy" name="policy" type="radio" value="CBDC Policy" required
-                                    class="h-4 w-4 text-orange-600 focus:ring-orange-500 border-gray-300">
+                                    class="h-4 w-4 text-[#F5A623] focus:ring-[#F5A623] border-gray-600 bg-white">
                                 <label for="cbdcPolicy" class="ml-2 block text-sm text-black">CBDC Policy</label>
                             </div>
                             <div class="flex items-center">
                                 <input id="btcPolicy" name="policy" type="radio" value="BTC Policy"
-                                    class="h-4 w-4 text-orange-600 focus:ring-orange-500 border-gray-300">
+                                    class="h-4 w-4 text-[#F5A623] focus:ring-[#F5A623] border-gray-600 bg-white">
                                 <label for="btcPolicy" class="ml-2 block text-sm text-black">BTC Policy</label>
                             </div>
                             <div class="flex items-center">
                                 <input id="taxPolicy" name="policy" type="radio" value="Tax Policy"
-                                    class="h-4 w-4 text-orange-600 focus:ring-orange-500 border-gray-300">
+                                    class="h-4 w-4 text-[#F5A623] focus:ring-[#F5A623] border-gray-600 bg-white">
                                 <label for="taxPolicy" class="ml-2 block text-sm text-black">Tax Policy</label>
                             </div>
                         </div>
@@ -76,17 +95,17 @@
 
             <!-- Find My MP Button -->
             <button type="submit" id="findMpButton"
-                class="w-full bg-gradient-to-r from-orange-700 to-orange-300 text-white py-3 px-4 rounded-md hover:brightness-105 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 transition-colors disabled:bg-gray-400">
+                class="w-full gradient-button py-3 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-[#F5A623] focus:ring-offset-2 transition-colors disabled:bg-gray-400">
                 Find My MP
             </button>
 
             <!-- MP Information Display -->
-            <div id="mpInfo" class="hidden p-4 rounded-lg">
-                <h2 class="text-xl font-semibold mb-2 text-orange-700">Your MP</h2>
+            <div id="mpInfo" class="hidden bg-white p-4 rounded-lg">
+                <h2 class="text-xl font-semibold mb-2 gradient-text">Your MP</h2>
                 <p id="mpDetails" class="text-black"></p>
                 <p id="emailStatus" class="mt-4 text-gray-600 hidden"></p>
                 <button id="contactMpButton" 
-                    class="mt-4 w-full bg-gradient-to-r from-orange-700 to-orange-300 text-white py-3 px-4 rounded-md hover:brightness-105 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 transition-colors disabled:bg-gray-400 hidden">
+                    class="mt-4 w-full gradient-button py-3 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-[#F5A623] focus:ring-offset-2 transition-colors disabled:bg-gray-400 hidden">
                     Contact My MP
                 </button>
             </div>
@@ -101,11 +120,100 @@
         const findMpButton = document.getElementById('findMpButton');
         const contactMpButton = document.getElementById('contactMpButton');
 
-        // Prepopulated letters (placeholders)
+        // Function to format the current date as DD/MM/YYYY
+        function getCurrentDate() {
+            const today = new Date();
+            const day = String(today.getDate()).padStart(2, '0');
+            const month = String(today.getMonth() + 1).padStart(2, '0');
+            const year = today.getFullYear();
+            return `${day}/${month}/${year}`;
+        }
+
+        // Prepopulated letters
         const letters = {
-            "CBDC Policy": `I am writing to express my concerns about Central Bank Digital Currencies (CBDCs). I believe CBDCs pose significant risks to financial privacy and individual freedoms. The potential for government surveillance through transaction tracking is alarming, and the centralization of financial control could undermine economic resilience. I urge you to oppose the development and implementation of CBDCs in the UK and advocate for policies that protect decentralized financial systems.`,
-            "BTC Policy": `[Placeholder: Insert letter about BTC Policy here]`,
-            "Tax Policy": `[Placeholder: Insert letter about Tax Policy here]`
+            "BTC Policy": (userName, postcode, mpFirstName, mpLastName) => `
+${postcode}
+${getCurrentDate()}
+
+Dear ${mpFirstName} ${mpLastName},
+
+My name is ${userName}, and I am one of your constituents. My postcode address is set out above.
+
+I am writing to respectfully request that you use your position as my Member of Parliament to urge the Financial Conduct Authority (FCA) to revisit the current classification of Bitcoin as a "restricted mass market investment" and additionally to consider the potential that the Bitcoin mining industry has in order to help the United Kingdom meet its climate goals.
+
+While I fully appreciate and support the FCA’s commitment to consumer protection, the existing classification significantly limits financial advisors’ ability to provide regulated, professionally managed Bitcoin exposure through exchange-traded notes (ETNs) and exchange-traded products (ETPs). These products offer transparent, regulated, and secure avenues for investors to gain exposure to Bitcoin without the complexities of direct custody. However, the FCA has currently completely forbidden retail investors from investing in ETF/ETN products that give exposure to Bitcoin - even though it remains simple and lawful to buy the underlying asset.
+
+I believe that having regulated Bitcoin investment options is crucial to meet growing demand and to responsibly integrate Bitcoin into diversified portfolios. Unfortunately, the current restrictions inadvertently push retail investors toward riskier, unregulated alternatives, which counteracts the FCA’s intent to enhance investor protection.
+
+By reclassifying Bitcoin simply as digital cash (albeit not one issued by the state or by banks) and allowing regulated financial institutions to offer Bitcoin ETNs and ETPs, we can better safeguard investors and align with global financial trends. UK investors deserve access to one of the best-performing assets of the last decade in safe, regulated environments, within their tax wrappers, and managed by professionals.
+
+Furthermore, many countries are embracing Bitcoin and integrating it into their financial systems. If the UK does not adapt its regulations accordingly, we risk falling behind in this rapidly evolving sector.
+
+Moreover, Bitcoin presents unique opportunities for the UK’s energy sector. Bitcoin mining can play a role in stabilizing the grid and utilizing excess renewable energy, aligning with the government’s aim to make Britain a clean energy superpower. By fostering a regulatory environment that encourages responsible Bitcoin mining, we can turn a costly problem—curtailed renewable energy—into a profitable solution, as demonstrated in regions like Texas. For a detailed analysis of how Bitcoin mining can benefit the UK’s energy landscape, please see the briefing paper available here.
+
+I kindly urge you to ask the FCA to reconsider Bitcoin’s regulatory classification. This change would foster innovation, enhance investor protection, and position the UK as a leader in the global financial and energy sectors. Please note that I am specifically requesting a reconsideration of Bitcoin’s classification, not that of other cryptocurrencies, as they differ significantly, having very different risk profiles, and should not be treated uniformly.
+
+Thank you for your attention to this important matter. I look forward to your support in ensuring that UK investors, the energy sector, and British citizens in general can benefit from the opportunities that Bitcoin offers.
+
+Yours sincerely,
+${userName}
+`,
+            "CBDC Policy": (userName, postcode, mpFirstName, mpLastName) => `
+${postcode}
+${getCurrentDate()}
+
+Dear ${mpFirstName} ${mpLastName},
+
+My name is ${userName}, and I am one of your constituents. My postcode address is set out above.
+
+Opposition to Central Bank Digital Currencies (CBDCs)
+
+I am writing to urge you to oppose the introduction of a Central Bank Digital Currency (CBDC) in the UK, and instead consider the significant financial and environmental benefits of embracing Bitcoin and its associated technologies, as outlined below.
+
+Key Concerns Regarding CBDCs
+- Lack of Necessity: Existing digital payment systems, including Faster Payments, CHAPS, and RTGS, already provide efficient solutions for domestic and international transactions. A CBDC offers no compelling use case not already met by these systems or by innovative technologies like Bitcoin’s Lightning Network, which already enables near-instant, low-cost global payments.
+- Privacy and Surveillance Risks: A CBDC, as proposed, would enable unprecedented central bank control over individual transactions, potentially allowing spending limits, transaction restrictions, or even account freezes without judicial oversight. This undermines the fundamental right to financial privacy and risks violating the Human Rights Act 1998 and the European Convention on Human Rights (Articles 8 and 10).
+- Financial Exclusion: Requiring identity verification for CBDC use excludes the unbanked, contradicting any proponent claims of promoting financial inclusion. In contrast, Bitcoin requires no KYC, allowing anyone to create a wallet and transact globally, instantly, and cheaply.
+- Economic and Security Risks: A CBDC creates a centralised point of failure, vulnerable to cyberattacks by hostile actors. It also risks financial instability, as seen in Nigeria, whose citizens rejected a CBDC despite cash shortages engineered by the central bank. Bitcoin’s decentralised network, having as it does an uptime of 99.9% over 14 years, is resilient to such threats.
+- Ultra Vires Concerns: The Bank of England’s proposed expansion of powers to monitor and control transactions exceeds its statutory mandate. Extending these powers must require parliamentary debate and new primary legislation, which I would urge you to oppose on my behalf.
+
+Bitcoin’s Financial and Environmental Benefits
+- Financial Innovation: Bitcoin’s Lightning Network enables low-cost, instant payments reducing merchant fees compared to Visa/Mastercard and supporting micropayments on social media networks like Nostr.
+- Economic Opportunity: Early adoption of Bitcoin could position the UK as a global leader in a growing industry, attracting tax revenue, tourism, and innovation. Countries like El Salvador and the UAE are already leveraging Bitcoin for economic gains.
+- Environmental Potential: Bitcoin mining can stabilise renewable energy grids through demand response and reduce methane emissions by utilising excess energy, as we are already seeing in Bhutan and Abu Dhabi. The UK’s abundant wind energy could be similarly harnessed, with mined Bitcoin held as a Treasury reserve asset alongside gold.
+- Censorship Resistance: Bitcoin’s permissionless, immutable protocol ensures no government or entity can control, confiscate, or debase it, offering citizens financial autonomy and protection against authoritarian overreach, as evidenced in Nigeria, Belarus, and Hong Kong.
+
+Recommendation
+I would ask that you use your voice in Parliament strongly to reject the digital pound and instead explore Bitcoin’s potential to enhance financial inclusion, efficiency, and economic resilience. The Bank of England should focus on maintaining access to physical cash, which preserves privacy and autonomy, and study Bitcoin’s open, permissionless protocols as a superior alternative for digital payments.
+
+Yours sincerely,
+${userName}
+`,
+            "Tax Policy": (userName, postcode, mpFirstName, mpLastName) => `
+${postcode}
+${getCurrentDate()}
+
+Dear ${mpFirstName} ${mpLastName},
+
+My name is ${userName}, and I am one of your constituents. My address is set out above.
+
+I am writing to raise concerns about the unequal tax treatment of Bitcoin compared to traditional financial assets, particularly in the context of lending and staking. This disparity hinders the UK’s financial services industry and its ability to drive innovation and growth in this rapidly expanding £1 trillion-plus market.
+
+Unlike traditional securities, which benefit from tax-neutral treatment under repurchase ("repo") and stock lending legislation, lending or staking Bitcoin and other cryptoassets is treated as a taxable event. This does not reflect the economic reality of these transactions, as acknowledged by HMRC and HM Treasury in their consultation on DeFi taxation (see GOV.UK: The taxation of decentralised finance involving the lending and staking of cryptoassets). Industry stakeholders have proposed a “composite no gain, no loss framework” to align the tax treatment of cryptoassets with traditional securities, ensuring fairness and clarity.
+
+This outdated tax framework puts Bitcoin at a disadvantage, limiting the UK’s potential to lead in innovative financial products. As the global Bitcoin market grows, the UK’s world-renowned financial services sector is well-positioned to offer a full spectrum of services, including collateralised loans and asset management for cryptoassets. However, without a level tax playing field, we risk missing this opportunity to foster growth and innovation.
+
+HMRC has indicated progress toward draft legislation to treat Bitcoin lending and staking as “no gain, no loss” transactions, aligning them with traditional securities. Yet, nearly three years after the consultation began, clarity is still lacking. We urge you to use your voice in Parliament to prioritise the swift introduction of this legislation to ensure tax policy keeps pace with regulatory developments and supports the UK’s ambition to be a global leader in cryptoasset financial services.
+
+A fair tax framework would reduce administrative burdens, provide clarity for businesses and investors, and enable the UK to develop exportable cryptoasset services. By addressing this issue, the government can position the UK as a hub for financial innovation, fostering growth in a sector poised for significant global impact.
+
+I respectfully request your support in advocating for this critical reform. Please consider raising this issue with HM Treasury to ensure that tax policy aligns with the economic reality of DeFi transactions.
+
+Thank you for your attention to this important issue; I look forward to your response.
+
+Yours sincerely,
+${userName}
+`
         };
 
         // CSV URL from Google Sheets
@@ -259,16 +367,15 @@
             }
 
             const userName = capitalizeName(document.getElementById('name').value);
+            const postcode = normalizePostcode(document.getElementById('postcode').value);
             const selectedPolicy = document.querySelector('input[name="policy"]:checked').value;
 
             if (mpDataResult && mpDataResult.Email) {
                 const mpFirstName = mpDataResult.Forename;
                 const mpLastName = mpDataResult.Surname;
                 const policy = selectedPolicy;
-                const letter = letters[policy];
-                const emailBody = encodeURIComponent(
-                    `Dear ${mpFirstName} ${mpLastName},\n\n${letter}\n\nSincerely,\n${userName}`
-                );
+                const letter = letters[policy](userName, postcode, mpFirstName, mpLastName);
+                const emailBody = encodeURIComponent(letter);
                 const mailtoLink = `mailto:${mpDataResult.Email}?subject=Concerns%20about%20${encodeURIComponent(policy)}&body=${emailBody}`;
                 window.location.href = mailtoLink; // Directly open the email client
                 emailStatus.textContent = "Opening your email client...";
