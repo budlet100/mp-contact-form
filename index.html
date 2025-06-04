@@ -75,17 +75,17 @@
                             <div class="flex items-center">
                                 <input id="cbdcPolicy" name="policy" type="radio" value="CBDC Policy" required
                                     class="h-4 w-4 text-[#F5A623] focus:ring-[#F5A623] border-gray-600 bg-white">
-                                <label for="cbdcPolicy" class="ml-2 block text-sm text-black">CBDC Policy</label>
+                                <label for="cbdcPolicy" class="ml-2 block text-sm text-black">1. CBDC Opposition</label>
                             </div>
                             <div class="flex items-center">
                                 <input id="btcPolicy" name="policy" type="radio" value="BTC Policy"
                                     class="h-4 w-4 text-[#F5A623] focus:ring-[#F5A623] border-gray-600 bg-white">
-                                <label for="btcPolicy" class="ml-2 block text-sm text-black">BTC Policy</label>
+                                <label for="btcPolicy" class="ml-2 block text-sm text-black">2. Classification of Bitcoin by FCA</label>
                             </div>
                             <div class="flex items-center">
                                 <input id="taxPolicy" name="policy" type="radio" value="Tax Policy"
                                     class="h-4 w-4 text-[#F5A623] focus:ring-[#F5A623] border-gray-600 bg-white">
-                                <label for="taxPolicy" class="ml-2 block text-sm text-black">Tax Policy</label>
+                                <label for="taxPolicy" class="ml-2 block text-sm text-black">3. Bitcoin Tax Treatment</label>
                             </div>
                         </div>
                         <p id="policyError" class="hidden text-[#EF4444] text-sm mt-1">Please select a policy issue</p>
@@ -137,7 +137,7 @@ ${getCurrentDate()}
 
 Dear ${mpFirstName} ${mpLastName},
 
-My name is ${userName}, and I am one of your constituents. My postcode is set out above.
+My name is ${userName}, and I am one of your constituents. My postcode address is set out above.
 
 I am writing to respectfully request that you use your position as my Member of Parliament to urge the Financial Conduct Authority (FCA) to revisit the current classification of Bitcoin as a "restricted mass market investment" and additionally to consider the potential that the Bitcoin mining industry has in order to help the United Kingdom meet its climate goals.
 
@@ -164,7 +164,7 @@ ${getCurrentDate()}
 
 Dear ${mpFirstName} ${mpLastName},
 
-My name is ${userName}, and I am one of your constituents. My postcode is set out above.
+My name is ${userName}, and I am one of your constituents. My postcode address is set out above.
 
 Opposition to Central Bank Digital Currencies (CBDCs)
 
@@ -335,27 +335,44 @@ ${userName}
                 return;
             }
 
-            const apiKey = 'FncmgQEVdkSUE32UAMFKFsca'; // TODO: Secure this API key
-            const apiUrl = `https://www.theyworkforyou.com/api/getMP?postcode=${postcode}&key=${apiKey}`;
+            // Use Postcodes.io to get constituency
+            const apiUrl = `https://api.postcodes.io/postcodes/${encodeURIComponent(postcode)}`;
 
             try {
                 const response = await fetch(apiUrl);
+                if (!response.ok) {
+                    throw new Error(`Postcodes.io API error: ${response.status}`);
+                }
                 const data = await response.json();
-                const mpName = data.full_name;
-                const mpParty = data.party;
-                const mpConstituency = data.constituency;
+                if (data.status !== 200 || !data.result) {
+                    throw new Error('Invalid postcode or no data returned');
+                }
+
+                const mpConstituency = data.result.parliamentary_constituency;
                 mpDataResult = await getMpData(mpConstituency);
 
-                mpDetails.textContent = `${mpName} (${mpParty}) - ${mpConstituency}`;
+                if (!mpDataResult) {
+                    throw new Error('MP not found for this constituency');
+                }
+
+                // Display MP details (name, party unknown, constituency)
+                const mpName = `${mpDataResult.Forename} ${mpDataResult.Surname}`;
+                mpDetails.textContent = `${mpName} - ${mpConstituency}`; // Party not available
                 mpInfo.classList.remove('hidden');
                 contactMpButton.classList.remove('hidden');
                 emailStatus.classList.add('hidden');
+
+                // Scroll to the MP Info section
+                mpInfo.scrollIntoView({ behavior: 'smooth', block: 'start' });
             } catch (error) {
                 console.error('Error fetching MP data:', error);
                 mpDetails.textContent = 'Error fetching MP data. Please try again.';
                 mpInfo.classList.remove('hidden');
                 contactMpButton.classList.add('hidden');
                 emailStatus.classList.add('hidden');
+
+                // Scroll to the MP Info section on error
+                mpInfo.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }
         });
 
